@@ -75,6 +75,7 @@ type Session struct {
 	CameraID  int32
 	CreatedAt pgtype.Timestamp
 	UpdatedAt pgtype.Timestamp
+	GymID     int32
 }
 
 type User struct {

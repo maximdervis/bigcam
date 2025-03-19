@@ -17,6 +17,7 @@ select
 from users u
 inner join access_grants g
 on u.id = g.user_id
+where u.id = $1
 `
 
 type GetAvailableGymsRow struct {
@@ -25,8 +26,8 @@ type GetAvailableGymsRow struct {
 	AccessType AccessType
 }
 
-func (q *Queries) GetAvailableGyms(ctx context.Context) ([]GetAvailableGymsRow, error) {
-	rows, err := q.db.Query(ctx, getAvailableGyms)
+func (q *Queries) GetAvailableGyms(ctx context.Context, id int32) ([]GetAvailableGymsRow, error) {
+	rows, err := q.db.Query(ctx, getAvailableGyms, id)
 	if err != nil {
 		return nil, err
 	}

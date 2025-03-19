@@ -6,6 +6,6 @@ sql:
       gen:
           go:
               package: db
-              out: server/db
+              out: server/src/db
               sql_package: pgx/v5
 

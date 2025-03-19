@@ -5,4 +5,5 @@ select
   g.access_type as access_type
 from users u
 inner join access_grants g
-on u.id = g.user_id;
+on u.id = g.user_id
+where u.id = $1;

@@ -1,11 +1,11 @@
-version: "2"
-sql:
-    - engine: postgresql
-      queries: ./db/query/
-      schema: ./db/migration/
-      gen:
-          go:
-              package: db
-              out: server/src/db
-              sql_package: pgx/v5
-
+version: "1"
+packages:
+  - name: "db"
+    path: "./server/src/db"
+    queries: "./db/query/"
+    schema: "./db/migration/"
+    engine: "postgresql"
+    emit_db_tags: true
+    emit_prepared_queries: false
+    emit_interface: false
+    emit_exact_table_names: false

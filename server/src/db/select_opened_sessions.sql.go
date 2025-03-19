@@ -18,12 +18,12 @@ where user_id = $1
 `
 
 type SelectOpenedSessionsRow struct {
-	GymID    int32
-	CameraID int32
+	GymID    int32 `db:"gym_id"`
+	CameraID int32 `db:"camera_id"`
 }
 
 func (q *Queries) SelectOpenedSessions(ctx context.Context, userID int32) ([]SelectOpenedSessionsRow, error) {
-	rows, err := q.db.Query(ctx, selectOpenedSessions, userID)
+	rows, err := q.db.QueryContext(ctx, selectOpenedSessions, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +35,9 @@ func (q *Queries) SelectOpenedSessions(ctx context.Context, userID int32) ([]Sel
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

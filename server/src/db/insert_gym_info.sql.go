@@ -15,6 +15,6 @@ values ($1)
 `
 
 func (q *Queries) InsertGym(ctx context.Context, name string) error {
-	_, err := q.db.Exec(ctx, insertGym, name)
+	_, err := q.db.ExecContext(ctx, insertGym, name)
 	return err
 }

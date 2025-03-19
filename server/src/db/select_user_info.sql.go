@@ -19,12 +19,12 @@ limit 1
 `
 
 type SelectUserInfoRow struct {
-	FirstName string
-	LastName  string
+	FirstName string `db:"first_name"`
+	LastName  string `db:"last_name"`
 }
 
 func (q *Queries) SelectUserInfo(ctx context.Context, id int32) (SelectUserInfoRow, error) {
-	row := q.db.QueryRow(ctx, selectUserInfo, id)
+	row := q.db.QueryRowContext(ctx, selectUserInfo, id)
 	var i SelectUserInfoRow
 	err := row.Scan(&i.FirstName, &i.LastName)
 	return i, err

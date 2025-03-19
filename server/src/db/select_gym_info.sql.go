@@ -18,7 +18,7 @@ limit 1
 `
 
 func (q *Queries) SelectGymInfo(ctx context.Context, id int32) (string, error) {
-	row := q.db.QueryRow(ctx, selectGymInfo, id)
+	row := q.db.QueryRowContext(ctx, selectGymInfo, id)
 	var name string
 	err := row.Scan(&name)
 	return name, err

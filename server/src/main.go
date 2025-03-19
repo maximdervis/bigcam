@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,7 +11,9 @@ import (
 	"server/src/util"
 
 	dbCon "server/src/db"
+
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -18,14 +21,35 @@ var (
 	db     *dbCon.Queries
 	ctx    context.Context
 
-	ContactController controllers.GymController
-	ContactRoutes     routes.Routes
+	GymController controllers.GymController
+	Route     routes.Routes
 )
 
+func init() {
+	ctx = context.TODO()
+	config, err := util.LoadConfig(".")
+
+	if err != nil {
+		log.Fatalf("could not loadconfig: %v", err)
+	}
+
+	conn, err := sql.Open(config.DbDriver, config.DbSource)
+	if err != nil {
+		log.Fatalf("Could not connect to database: %v", err)
+	}
+
+	db = dbCon.New(conn)
+
+	fmt.Println("PostgreSql connected successfully...")
+
+	GymController = *controllers.NewGymController(db, ctx)
+	Route = routes.NewRoute(GymController)
+
+	server = gin.Default()
+}
 
 func main() {
 	config, err := util.LoadConfig(".")
-
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
@@ -36,7 +60,7 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"message": "Doing well, by now"})
 	})
 
-	ContactRoutes.Route(router)
+	Route.Route(router)
 
 	server.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": fmt.Sprintf("The specified route %s not found", ctx.Request.URL)})

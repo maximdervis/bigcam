@@ -21,13 +21,13 @@ where u.id = $1
 `
 
 type GetAvailableGymsRow struct {
-	UserID     int32
-	GymID      int32
-	AccessType AccessType
+	UserID     int32      `db:"user_id"`
+	GymID      int32      `db:"gym_id"`
+	AccessType AccessType `db:"access_type"`
 }
 
 func (q *Queries) GetAvailableGyms(ctx context.Context, id int32) ([]GetAvailableGymsRow, error) {
-	rows, err := q.db.Query(ctx, getAvailableGyms, id)
+	rows, err := q.db.QueryContext(ctx, getAvailableGyms, id)
 	if err != nil {
 		return nil, err
 	}
@@ -39,6 +39,9 @@ func (q *Queries) GetAvailableGyms(ctx context.Context, id int32) ([]GetAvailabl
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

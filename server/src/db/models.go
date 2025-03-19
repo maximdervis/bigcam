@@ -7,8 +7,7 @@ package db
 import (
 	"database/sql/driver"
 	"fmt"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 type AccessType string
@@ -54,35 +53,35 @@ func (ns NullAccessType) Value() (driver.Value, error) {
 }
 
 type AccessGrant struct {
-	ID         int32
-	UserID     int32
-	GymID      int32
-	AccessType AccessType
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
+	ID         int32      `db:"id"`
+	UserID     int32      `db:"user_id"`
+	GymID      int32      `db:"gym_id"`
+	AccessType AccessType `db:"access_type"`
+	CreatedAt  time.Time  `db:"created_at"`
+	UpdatedAt  time.Time  `db:"updated_at"`
 }
 
 type Gym struct {
-	ID        int32
-	Name      string
-	CreatedAt pgtype.Timestamp
-	UpdatedAt pgtype.Timestamp
+	ID        int32     `db:"id"`
+	Name      string    `db:"name"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 type Session struct {
-	ID        int32
-	UserID    int32
-	CameraID  int32
-	CreatedAt pgtype.Timestamp
-	UpdatedAt pgtype.Timestamp
-	GymID     int32
+	ID        int32     `db:"id"`
+	UserID    int32     `db:"user_id"`
+	CameraID  int32     `db:"camera_id"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+	GymID     int32     `db:"gym_id"`
 }
 
 type User struct {
-	ID        int32
-	Login     string
-	FirstName string
-	LastName  string
-	CreatedAt pgtype.Timestamp
-	UpdatedAt pgtype.Timestamp
+	ID        int32     `db:"id"`
+	Login     string    `db:"login"`
+	FirstName string    `db:"first_name"`
+	LastName  string    `db:"last_name"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }

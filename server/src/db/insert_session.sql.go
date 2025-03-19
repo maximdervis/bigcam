@@ -15,11 +15,11 @@ values ($1, $2)
 `
 
 type InsertSessionParams struct {
-	UserID   int32
-	CameraID int32
+	UserID   int32 `db:"user_id"`
+	CameraID int32 `db:"camera_id"`
 }
 
 func (q *Queries) InsertSession(ctx context.Context, arg InsertSessionParams) error {
-	_, err := q.db.Exec(ctx, insertSession, arg.UserID, arg.CameraID)
+	_, err := q.db.ExecContext(ctx, insertSession, arg.UserID, arg.CameraID)
 	return err
 }

@@ -43,7 +43,7 @@ func (cc *GymController) GetGym(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "Failed to parse integer from gym_id", "error": err.Error()})
 	}
-	gym, err := cc.db.SelectGymInfo(ctx, int32(gymIdInt));
+	gym, err := cc.db.SelectGymInfo(ctx, int32(gymIdInt))
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": "Failed to retrieve gym with this ID"})

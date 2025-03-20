@@ -22,7 +22,7 @@ var (
 	ctx    context.Context
 
 	GymController controllers.GymController
-	Route     routes.Routes
+	Route         routes.Routes
 )
 
 func init() {
@@ -73,4 +73,3 @@ func main() {
 
 	log.Fatal(server.Run(":" + config.ServerAddress))
 }
-

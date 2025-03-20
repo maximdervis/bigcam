@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"server/src/controllers"
 	"github.com/gin-gonic/gin"
+	"server/src/controllers"
 )
 
 type Routes struct {

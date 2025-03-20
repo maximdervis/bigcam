@@ -30,11 +30,11 @@ func (cc *GymController) CreateGym(ctx *gin.Context) {
 
 	err := cc.db.InsertGym(ctx, payload.Name)
 	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "Failed retrieving contact", "error": err.Error()})
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "Failed creating gym", "error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "successfully created contact"})
+	ctx.JSON(http.StatusOK, gin.H{"status": "Successfully created Gym"})
 }
 
 func (cc *GymController) GetGym(ctx *gin.Context) {

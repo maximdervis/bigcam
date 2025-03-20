@@ -33,9 +33,14 @@ func init() {
 		log.Fatalf("could not loadconfig: %v", err)
 	}
 
+	log.Printf("Connecting using driver %s, source %s", config.DbDriver, config.DbSource)
 	conn, err := sql.Open(config.DbDriver, config.DbSource)
 	if err != nil {
 		log.Fatalf("Could not connect to database: %v", err)
+	}
+
+	if err := conn.Ping(); err != nil {
+		log.Fatal(err)
 	}
 
 	db = dbCon.New(conn)

@@ -1,11 +1,11 @@
-alter table gyms alter colump updated_at
+alter table gyms alter column updated_at
 drop default;
 
-alter table access_rights alter colump updated_at
+alter table access_rights alter column updated_at
 drop default;
 
-alter table sessions alter colump updated_at
+alter table sessions alter column updated_at
 drop default;
 
-alter table users alter colump updated_at
+alter table users alter column updated_at
 drop default;

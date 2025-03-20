@@ -5,15 +5,15 @@ import (
 	"server/src/controllers"
 )
 
-type Routes struct {
+type GymRoute struct {
 	gymController controllers.GymController
 }
 
-func NewRoute(gymController controllers.GymController) Routes {
-	return Routes{gymController}
+func NewRoute(gymController controllers.GymController) GymRoute {
+	return GymRoute{gymController}
 }
 
-func (r *Routes) Route(rg *gin.RouterGroup) {
+func (r *GymRoute) Route(rg *gin.RouterGroup) {
 	router := rg.Group("gyms")
 	router.POST("/create", r.gymController.CreateGym)
 	router.GET("/get/:gym_id", r.gymController.GetGym)

@@ -22,7 +22,7 @@ var (
 	ctx    context.Context
 
 	GymController controllers.GymController
-	Route         routes.Routes
+	GymRoute      routes.GymRoute
 )
 
 func init() {
@@ -48,7 +48,7 @@ func init() {
 	fmt.Println("PostgreSql connected successfully...")
 
 	GymController = *controllers.NewGymController(db, ctx)
-	Route = routes.NewRoute(GymController)
+	GymRoute = routes.NewRoute(GymController)
 
 	server = gin.Default()
 }
@@ -65,7 +65,7 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"message": "Doing well, by now"})
 	})
 
-	Route.Route(router)
+	GymRoute.Route(router)
 
 	server.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": fmt.Sprintf("The specified route %s not found", ctx.Request.URL)})

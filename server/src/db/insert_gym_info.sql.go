@@ -10,11 +10,16 @@ import (
 )
 
 const insertGym = `-- name: InsertGym :exec
-insert into gyms (name)
-values ($1)
+insert into gyms (name, auth_key)
+values ($1, $2)
 `
 
-func (q *Queries) InsertGym(ctx context.Context, name string) error {
-	_, err := q.db.ExecContext(ctx, insertGym, name)
+type InsertGymParams struct {
+	Name    string `db:"name"`
+	AuthKey string `db:"auth_key"`
+}
+
+func (q *Queries) InsertGym(ctx context.Context, arg InsertGymParams) error {
+	_, err := q.db.ExecContext(ctx, insertGym, arg.Name, arg.AuthKey)
 	return err
 }

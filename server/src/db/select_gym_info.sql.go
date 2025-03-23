@@ -17,7 +17,7 @@ where id = $1
 limit 1
 `
 
-func (q *Queries) SelectGymInfo(ctx context.Context, id int32) (string, error) {
+func (q *Queries) SelectGymInfo(ctx context.Context, id int64) (string, error) {
 	row := q.db.QueryRowContext(ctx, selectGymInfo, id)
 	var name string
 	err := row.Scan(&name)

@@ -15,8 +15,8 @@ values ($1, $2)
 `
 
 type InsertSessionParams struct {
-	UserID   int32 `db:"user_id"`
-	CameraID int32 `db:"camera_id"`
+	UserID   int64 `db:"user_id"`
+	CameraID int64 `db:"camera_id"`
 }
 
 func (q *Queries) InsertSession(ctx context.Context, arg InsertSessionParams) error {

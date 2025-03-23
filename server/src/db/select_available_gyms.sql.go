@@ -21,12 +21,12 @@ where u.id = $1
 `
 
 type GetAvailableGymsRow struct {
-	UserID     int32      `db:"user_id"`
-	GymID      int32      `db:"gym_id"`
+	UserID     int64      `db:"user_id"`
+	GymID      int64      `db:"gym_id"`
 	AccessType AccessType `db:"access_type"`
 }
 
-func (q *Queries) GetAvailableGyms(ctx context.Context, id int32) ([]GetAvailableGymsRow, error) {
+func (q *Queries) GetAvailableGyms(ctx context.Context, id int64) ([]GetAvailableGymsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAvailableGyms, id)
 	if err != nil {
 		return nil, err

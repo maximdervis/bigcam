@@ -23,7 +23,7 @@ type SelectUserInfoRow struct {
 	LastName  string `db:"last_name"`
 }
 
-func (q *Queries) SelectUserInfo(ctx context.Context, id int32) (SelectUserInfoRow, error) {
+func (q *Queries) SelectUserInfo(ctx context.Context, id int64) (SelectUserInfoRow, error) {
 	row := q.db.QueryRowContext(ctx, selectUserInfo, id)
 	var i SelectUserInfoRow
 	err := row.Scan(&i.FirstName, &i.LastName)

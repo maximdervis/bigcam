@@ -53,32 +53,33 @@ func (ns NullAccessType) Value() (driver.Value, error) {
 }
 
 type AccessGrant struct {
-	ID         int32      `db:"id"`
-	UserID     int32      `db:"user_id"`
-	GymID      int32      `db:"gym_id"`
+	ID         int64      `db:"id"`
+	UserID     int64      `db:"user_id"`
+	GymID      int64      `db:"gym_id"`
 	AccessType AccessType `db:"access_type"`
 	CreatedAt  time.Time  `db:"created_at"`
 	UpdatedAt  time.Time  `db:"updated_at"`
 }
 
 type Gym struct {
-	ID        int32     `db:"id"`
+	ID        int64     `db:"id"`
 	Name      string    `db:"name"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
+	AuthKey   string    `db:"auth_key"`
 }
 
 type Session struct {
-	ID        int32     `db:"id"`
-	UserID    int32     `db:"user_id"`
-	CameraID  int32     `db:"camera_id"`
+	ID        int64     `db:"id"`
+	UserID    int64     `db:"user_id"`
+	CameraID  int64     `db:"camera_id"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 	GymID     int32     `db:"gym_id"`
 }
 
 type User struct {
-	ID        int32     `db:"id"`
+	ID        int64     `db:"id"`
 	Login     string    `db:"login"`
 	FirstName string    `db:"first_name"`
 	LastName  string    `db:"last_name"`

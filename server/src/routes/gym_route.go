@@ -9,12 +9,12 @@ type GymRoute struct {
 	gymController controllers.GymController
 }
 
-func NewRoute(gymController controllers.GymController) GymRoute {
+func NewGymRoute(gymController controllers.GymController) GymRoute {
 	return GymRoute{gymController}
 }
 
 func (r *GymRoute) Route(rg *gin.RouterGroup) {
-	router := rg.Group("gyms")
+	router := rg.Group("gym")
 	router.POST("/create", r.gymController.CreateGym)
 	router.GET("/get/:gym_id", r.gymController.GetGym)
 }

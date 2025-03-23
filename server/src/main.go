@@ -13,6 +13,7 @@ import (
 	dbCon "server/src/db"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	_ "github.com/lib/pq"
 )
 
@@ -21,8 +22,12 @@ var (
 	db     *dbCon.Queries
 	ctx    context.Context
 
-	GymController controllers.GymController
-	GymRoute      routes.GymRoute
+	GymController       controllers.GymController
+	GymCameraController controllers.GymCameraController
+	UserController      controllers.UserController
+	GymRoute            routes.GymRoute
+	GymCamaeraRoute     routes.GymCameraRoute
+	UserRoute           routes.UserRoute
 )
 
 func init() {
@@ -47,8 +52,24 @@ func init() {
 
 	fmt.Println("PostgreSql connected successfully...")
 
+	redis_client := redis.NewClient(&redis.Options{
+		Addr:     "redis:6379",
+		Password: "",
+		DB:       0,
+	})
+
+	pong, err := redis_client.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatalf("could not connect to redis: %v", err)
+	}
+	fmt.Println("Redist connected successfully: ", pong)
+
 	GymController = *controllers.NewGymController(db, ctx)
-	GymRoute = routes.NewRoute(GymController)
+	UserController = *controllers.NewUserController(db, ctx)
+	GymCameraController = *controllers.NewGymCameraController(db, ctx)
+	GymRoute = routes.NewGymRoute(GymController)
+	GymCamaeraRoute = routes.NewGymCameraRoute(GymCameraController)
+	UserRoute = routes.NewUserRoute(UserController)
 
 	server = gin.Default()
 }
@@ -66,6 +87,8 @@ func main() {
 	})
 
 	GymRoute.Route(router)
+	UserRoute.Route(router)
+	GymCamaeraRoute.Route(router)
 
 	server.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": fmt.Sprintf("The specified route %s not found", ctx.Request.URL)})

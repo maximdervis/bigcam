@@ -19,10 +19,10 @@ where user_id = $1
 
 type SelectOpenedSessionsRow struct {
 	GymID    int32 `db:"gym_id"`
-	CameraID int32 `db:"camera_id"`
+	CameraID int64 `db:"camera_id"`
 }
 
-func (q *Queries) SelectOpenedSessions(ctx context.Context, userID int32) ([]SelectOpenedSessionsRow, error) {
+func (q *Queries) SelectOpenedSessions(ctx context.Context, userID int64) ([]SelectOpenedSessionsRow, error) {
 	rows, err := q.db.QueryContext(ctx, selectOpenedSessions, userID)
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
 -- name: InsertGym :exec
-insert into gyms (name)
-values ($1);
+insert into gyms (name, auth_key)
+values ($1, $2);
 

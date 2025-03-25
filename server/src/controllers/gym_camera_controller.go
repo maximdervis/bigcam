@@ -2,19 +2,22 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"server/src/db"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 )
 
 type GymCameraController struct {
-	db  *db.Queries
-	ctx context.Context
+	db    *db.Queries
+	redis *redis.Client
+	ctx   context.Context
 }
 
-func NewGymCameraController(db *db.Queries, ctx context.Context) *GymCameraController {
-	return &GymCameraController{db, ctx}
+func NewGymCameraController(db *db.Queries, redis *redis.Client, ctx context.Context) *GymCameraController {
+	return &GymCameraController{db, redis, ctx}
 }
 
 func (cc *GymCameraController) GetCameras(ctx *gin.Context) {
@@ -26,6 +29,9 @@ func (cc *GymCameraController) GetCameras(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"code": "BAD_REQUEST", "message": err.Error()})
 		return
 	}
+
+	ip_addr := cc.redis.Get(ctx, payload.GymId)
+	fmt.Println("Got client ip address", ip_addr.Val())
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"cameras": []gin.H{

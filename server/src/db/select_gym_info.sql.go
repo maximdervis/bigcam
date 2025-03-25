@@ -9,6 +9,21 @@ import (
 	"context"
 )
 
+const selectGymIdByAuthKey = `-- name: SelectGymIdByAuthKey :one
+select
+  id
+from gyms u
+where auth_key = $1
+limit 1
+`
+
+func (q *Queries) SelectGymIdByAuthKey(ctx context.Context, authKey string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, selectGymIdByAuthKey, authKey)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
 const selectGymInfo = `-- name: SelectGymInfo :one
 select
   name

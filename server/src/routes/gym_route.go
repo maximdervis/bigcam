@@ -16,5 +16,6 @@ func NewGymRoute(gymController controllers.GymController) GymRoute {
 func (r *GymRoute) Route(rg *gin.RouterGroup) {
 	router := rg.Group("gym")
 	router.POST("/create", r.gymController.CreateGym)
+	router.POST("/local/assign", r.gymController.LocalGymAssign)
 	router.GET("/get/:gym_id", r.gymController.GetGym)
 }

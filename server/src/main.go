@@ -52,21 +52,21 @@ func init() {
 
 	fmt.Println("PostgreSql connected successfully...")
 
-	redis_client := redis.NewClient(&redis.Options{
+	redis := redis.NewClient(&redis.Options{
 		Addr:     "redis:6379",
 		Password: "",
 		DB:       0,
 	})
 
-	pong, err := redis_client.Ping(context.Background()).Result()
+	pong, err := redis.Ping(ctx).Result()
 	if err != nil {
 		log.Fatalf("could not connect to redis: %v", err)
 	}
 	fmt.Println("Redist connected successfully: ", pong)
 
-	GymController = *controllers.NewGymController(db, ctx)
+	GymController = *controllers.NewGymController(db, redis, ctx)
 	UserController = *controllers.NewUserController(db, ctx)
-	GymCameraController = *controllers.NewGymCameraController(db, ctx)
+	GymCameraController = *controllers.NewGymCameraController(db, redis, ctx)
 	GymRoute = routes.NewGymRoute(GymController)
 	GymCamaeraRoute = routes.NewGymCameraRoute(GymCameraController)
 	UserRoute = routes.NewUserRoute(UserController)

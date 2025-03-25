@@ -41,17 +41,17 @@ func getSignedToken(userId int64, email string, exiresAt time.Time, secret []byt
 	return signedToken, nil
 }
 
-func getToken(userId int64, email string, expiresAt time.Time) (*jwt.Token) {
+func getToken(userId int64, email string, expiresAt time.Time) *jwt.Token {
 	return jwt.NewWithClaims(
-			jwt.SigningMethodHS256,
-			models.Claims{
-				UserId: userId,
-				StandardClaims: jwt.StandardClaims{
-				    Subject:   email,
-				    ExpiresAt: expiresAt.Unix(),
-				},
+		jwt.SigningMethodHS256,
+		models.Claims{
+			UserId: userId,
+			StandardClaims: jwt.StandardClaims{
+				Subject:   email,
+				ExpiresAt: expiresAt.Unix(),
 			},
-		)
+		},
+	)
 }
 
 func IsAuthorized() gin.HandlerFunc {

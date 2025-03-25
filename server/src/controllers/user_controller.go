@@ -11,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 type UserController struct {
 	db  *db.Queries
 	ctx context.Context
@@ -45,9 +44,9 @@ func (cc *UserController) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	user :=	db.InsertUserInfoParams{
-		Name: payload.Name,
-		Email: payload.Email,
+	user := db.InsertUserInfoParams{
+		Name:     payload.Name,
+		Email:    payload.Email,
 		Password: payload.Password,
 	}
 	var errHash error
@@ -92,7 +91,6 @@ func (cc *UserController) SignIn(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"code": "BAD_REQUEST", "message": "Invalid password"})
 		return
 	}
-	
 
 	accessToken, accessErr := middlewares.GetAccessSignedToken(userInfo.ID, userInfo.Email)
 	if accessErr != nil {
@@ -106,15 +104,15 @@ func (cc *UserController) SignIn(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"access_token": accessToken,
+		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 	})
 }
 
 func (cc *UserController) RefreshAuthToken(ctx *gin.Context) {
 	type Request struct {
-		RefreshToken    string `json:"refresh_token" binding:"required"`
-		AccessToken string `json:"access_token" binding:"required"`
+		RefreshToken string `json:"refresh_token" binding:"required"`
+		AccessToken  string `json:"access_token" binding:"required"`
 	}
 	var payload *Request
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
@@ -126,14 +124,14 @@ func (cc *UserController) RefreshAuthToken(ctx *gin.Context) {
 	if parseErr != nil {
 		ctx.JSON(http.StatusForbidden, gin.H{"code": "ACCESS_DENIED", "message": parseErr.Error()})
 		return
-	} 
+	}
 	accessToken, accessErr := middlewares.GetAccessSignedToken(claims.UserId, claims.Subject)
 	if accessErr != nil {
 		ctx.JSON(http.StatusForbidden, gin.H{"code": "ACCESS_DENIED", "message": accessErr.Error()})
 		return
-	} 
+	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"access_token": accessToken,
+		"access_token":  accessToken,
 		"refresh_token": payload.RefreshToken,
 	})
 }

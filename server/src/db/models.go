@@ -81,8 +81,9 @@ type Session struct {
 type User struct {
 	ID        int64     `db:"id"`
 	Login     string    `db:"login"`
-	FirstName string    `db:"first_name"`
-	LastName  string    `db:"last_name"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
+	Password  string    `db:"password"`
+	Name      string    `db:"name"`
+	Email     string    `db:"email"`
 }

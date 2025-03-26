@@ -21,6 +21,7 @@ func NewGymCameraController(db *db.Queries, redis *redis.Client, ctx context.Con
 }
 
 func (cc *GymCameraController) GetCameras(ctx *gin.Context) {
+	// TODO: Доступы на получение камер в зале
 	type Request struct {
 		GymId string `json:"gym_id" binding:"required"`
 	}

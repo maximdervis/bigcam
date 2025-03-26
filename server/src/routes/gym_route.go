@@ -15,7 +15,10 @@ func NewGymRoute(gymController controllers.GymController) GymRoute {
 
 func (r *GymRoute) Route(rg *gin.RouterGroup) {
 	router := rg.Group("gym")
+	// TOOD: Поддержать доступы на создание залов
+	// TODO: Список залов для пользователя
 	router.POST("/create", r.gymController.CreateGym)
+	// TODO: Доступы на получение данных зала
 	router.POST("/local/assign", r.gymController.LocalGymAssign)
 	router.GET("/get/:gym_id", r.gymController.GetGym)
 }

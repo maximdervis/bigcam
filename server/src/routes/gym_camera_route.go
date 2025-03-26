@@ -15,5 +15,7 @@ func NewGymCameraRoute(gymCameraController controllers.GymCameraController) GymC
 
 func (r *GymCameraRoute) Route(rg *gin.RouterGroup) {
 	router := rg.Group("gym/camera")
+	// TODO: ptz
+	// TODO: [crit] Добавить проксирование по адресу из pg
 	router.GET("/list", r.gymCameraController.GetCameras)
 }

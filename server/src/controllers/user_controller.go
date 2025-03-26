@@ -144,20 +144,29 @@ func (cc *UserController) GetUser(ctx *gin.Context) {
 	if err != nil {
 		util.SetInternalErrorStatus(ctx, err)
 	}
+	var dob *time.Time
+	var avatarId *string
+	if userInfo.Dob.Valid {
+		dob = &userInfo.Dob.Time
+	}
+	if userInfo.AvatarID.Valid {
+		avatarId = &userInfo.AvatarID.String
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"email":     userInfo.Email,
 		"name":      userInfo.Name,
-		"dob":       userInfo.Dob,
-		"avatar_id": userInfo.AvatarID,
+		"dob":       dob,
+		"avatar_id": avatarId ,
 	})
 }
 
 func (cc *UserController) UpdateUser(ctx *gin.Context) {
 	var err error
-	userId, exists := ctx.Get("userID")
+	userIdRaw, exists := ctx.Get("userID")
 	if !exists {
 		util.SetInternalErrorStatus(ctx, "Failed to load user_id, not authorized?")
 	}
+	userId := userIdRaw.(int64)
 	type Request struct {
 		Email    *string    `json:"email,omitempty"`
 		Name     *string    `json:"name,omitempty"`
@@ -170,19 +179,56 @@ func (cc *UserController) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	updateData, err := payload.Dob.MarshalJSON()
-	if err != nil {
-		util.SetInternalErrorStatus(ctx, err)
-		return
-	}
-	err = cc.db.UpdateUserInfo(ctx, db.UpdateUserInfoParams{
-		UpdateData: updateData,
-		ID:         userId.(int64),
-	})
-	if err != nil {
-		util.SetInternalErrorStatus(ctx, err)
-		return
+	// TODO: Поддержать транзакционность
+	// TODO: Попробовать избавиться от дублирования
+	if payload.Email != nil {
+		err = cc.db.UpdateUserEmail(ctx, db.UpdateUserEmailParams{
+			ID: userId,
+			Email: *payload.Email,
+		})
+		if err != nil {
+			util.SetInternalErrorStatus(ctx, err)
+			return
+		}
 	}
 
+	if payload.Name != nil {
+		err = cc.db.UpdateUserName(ctx, db.UpdateUserNameParams{
+			ID: userId,
+			Name: *payload.Name,
+		})
+		if err != nil {
+			util.SetInternalErrorStatus(ctx, err)
+			return
+		}
+	}
+
+	if payload.Dob != nil {
+		err = cc.db.UpdateUserDob(ctx, db.UpdateUserDobParams{
+			ID: userId,
+			Dob: sql.NullTime{
+				Time: *payload.Dob,
+				Valid: true,
+			},
+		})
+		if err != nil {
+			util.SetInternalErrorStatus(ctx, err)
+			return
+		}
+	}
+
+	if payload.AvatarId != nil {
+		err = cc.db.UpdateUserAvatarId(ctx, db.UpdateUserAvatarIdParams{
+			ID: userId,
+			AvatarID: sql.NullString{
+				String: *payload.AvatarId,
+				Valid: true,
+			},
+		})
+		if err != nil {
+			util.SetInternalErrorStatus(ctx, err)
+			return
+		}
+	}
 	ctx.JSON(http.StatusOK, gin.H{})
 }

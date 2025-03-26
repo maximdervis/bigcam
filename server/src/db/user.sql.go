@@ -8,7 +8,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 )
 
 const containsUserWithEmail = `-- name: ContainsUserWithEmail :one
@@ -100,28 +99,74 @@ func (q *Queries) SelectUserInfoByEmail(ctx context.Context, email string) (Sele
 	return i, err
 }
 
-const updateUserInfo = `-- name: UpdateUserInfo :exec
-WITH input_data AS (
-  SELECT
-    $2::jsonb as data
-)
+const updateUserAvatarId = `-- name: UpdateUserAvatarId :exec
 UPDATE users
 SET
-  email = COALESCE(input_data.data->>'email', email),
-  name = COALESCE(input_data.data->>'name', name),
-  dob = COALESCE((input_data.data->>'dob')::date, dob),
-  avatar_id = COALESCE((input_data.data->>'avatar_id')::int, avatar_id),
+  avatar_id = $1,
   updated_at = now()
-FROM input_data
-WHERE id = $1
+WHERE id = $2
 `
 
-type UpdateUserInfoParams struct {
-	ID         int64           `db:"id"`
-	UpdateData json.RawMessage `db:"update_data"`
+type UpdateUserAvatarIdParams struct {
+	AvatarID sql.NullString `db:"avatar_id"`
+	ID       int64          `db:"id"`
 }
 
-func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) error {
-	_, err := q.db.ExecContext(ctx, updateUserInfo, arg.ID, arg.UpdateData)
+func (q *Queries) UpdateUserAvatarId(ctx context.Context, arg UpdateUserAvatarIdParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserAvatarId, arg.AvatarID, arg.ID)
+	return err
+}
+
+const updateUserDob = `-- name: UpdateUserDob :exec
+UPDATE users
+SET
+  dob = $1,
+  updated_at = now()
+WHERE id = $2
+`
+
+type UpdateUserDobParams struct {
+	Dob sql.NullTime `db:"dob"`
+	ID  int64        `db:"id"`
+}
+
+func (q *Queries) UpdateUserDob(ctx context.Context, arg UpdateUserDobParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserDob, arg.Dob, arg.ID)
+	return err
+}
+
+const updateUserEmail = `-- name: UpdateUserEmail :exec
+UPDATE users
+SET
+  email = $1,
+  updated_at = now()
+WHERE id = $2
+`
+
+type UpdateUserEmailParams struct {
+	Email string `db:"email"`
+	ID    int64  `db:"id"`
+}
+
+func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserEmail, arg.Email, arg.ID)
+	return err
+}
+
+const updateUserName = `-- name: UpdateUserName :exec
+UPDATE users
+SET
+  name = $1,
+  updated_at = now()
+WHERE id = $2
+`
+
+type UpdateUserNameParams struct {
+	Name string `db:"name"`
+	ID   int64  `db:"id"`
+}
+
+func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserName, arg.Name, arg.ID)
 	return err
 }

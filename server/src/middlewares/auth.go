@@ -3,6 +3,7 @@ package middlewares
 import (
 	"server/src/models"
 	"server/src/util"
+	"strconv"
 	"strings"
 	"time"
 
@@ -37,7 +38,7 @@ func GetSignedTokens(userId string) (*AuthData, error) {
 }
 
 func GetAccessSignedToken(userId string) (string, error) {
-	expiresAt := time.Now().Add(5 * time.Minute)
+	expiresAt := time.Now().Add(100 * time.Minute)
 	token, err := getSignedToken(userId, expiresAt, accessSecretKey)
 	if err != nil {
 		return "", nil
@@ -72,12 +73,19 @@ func IsAuthorized() gin.HandlerFunc {
 		accessToken := strings.Replace(authHeader, "Bearer ", "", 1)
 		claims, err := ParseAccessToken(accessToken)
 		if err != nil {
-			util.SetAccessDeniedStatusStatus(ctx, "Failed to parse access token")
+			util.SetAccessDeniedStatusStatus(ctx, err)
 			ctx.Abort()
 			return
 		}
 
-		ctx.Set("userID", claims.Subject)
+		userIdInt, err := strconv.ParseInt(claims.Subject, 10, 64)
+		if err != nil {
+			util.SetInternalErrorStatus(ctx, err)
+			ctx.Abort()
+			return
+		}
+		// TODO: Придумать какой-нибудь другой способ это дело прокинуть
+		ctx.Set("userID", userIdInt)
 		ctx.Next()
 	}
 }

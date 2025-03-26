@@ -27,17 +27,30 @@ where email = $1;
 insert into users (name, email, password)
 values ($1, $2, $3);
 
--- name: UpdateUserInfo :exec
-WITH input_data AS (
-  SELECT
-    sqlc.arg(update_data)::jsonb as data
-)
+-- name: UpdateUserEmail :exec
 UPDATE users
 SET
-  email = COALESCE(input_data.data->>'email', email),
-  name = COALESCE(input_data.data->>'name', name),
-  dob = COALESCE((input_data.data->>'dob')::date, dob),
-  avatar_id = COALESCE((input_data.data->>'avatar_id')::int, avatar_id),
+  email = $1,
   updated_at = now()
-FROM input_data
-WHERE id = $1;
+WHERE id = $2;
+
+-- name: UpdateUserName :exec
+UPDATE users
+SET
+  name = $1,
+  updated_at = now()
+WHERE id = $2;
+
+-- name: UpdateUserDob :exec
+UPDATE users
+SET
+  dob = $1,
+  updated_at = now()
+WHERE id = $2;
+
+-- name: UpdateUserAvatarId :exec
+UPDATE users
+SET
+  avatar_id = $1,
+  updated_at = now()
+WHERE id = $2;

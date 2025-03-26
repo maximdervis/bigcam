@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 )
 
 const containsUserWithEmail = `-- name: ContainsUserWithEmail :one
@@ -43,22 +45,29 @@ const selectUserInfo = `-- name: SelectUserInfo :one
 select
   name,
   email,
-  password
+  dob,
+  avatar_id
 from users u
 where id = $1
 limit 1
 `
 
 type SelectUserInfoRow struct {
-	Name     string `db:"name"`
-	Email    string `db:"email"`
-	Password string `db:"password"`
+	Name     string         `db:"name"`
+	Email    string         `db:"email"`
+	Dob      sql.NullTime   `db:"dob"`
+	AvatarID sql.NullString `db:"avatar_id"`
 }
 
 func (q *Queries) SelectUserInfo(ctx context.Context, id int64) (SelectUserInfoRow, error) {
 	row := q.db.QueryRowContext(ctx, selectUserInfo, id)
 	var i SelectUserInfoRow
-	err := row.Scan(&i.Name, &i.Email, &i.Password)
+	err := row.Scan(
+		&i.Name,
+		&i.Email,
+		&i.Dob,
+		&i.AvatarID,
+	)
 	return i, err
 }
 
@@ -89,4 +98,30 @@ func (q *Queries) SelectUserInfoByEmail(ctx context.Context, email string) (Sele
 		&i.Password,
 	)
 	return i, err
+}
+
+const updateUserInfo = `-- name: UpdateUserInfo :exec
+WITH input_data AS (
+  SELECT
+    $2::jsonb as data
+)
+UPDATE users
+SET
+  email = COALESCE(input_data.data->>'email', email),
+  name = COALESCE(input_data.data->>'name', name),
+  dob = COALESCE((input_data.data->>'dob')::date, dob),
+  avatar_id = COALESCE((input_data.data->>'avatar_id')::int, avatar_id),
+  updated_at = now()
+FROM input_data
+WHERE id = $1
+`
+
+type UpdateUserInfoParams struct {
+	ID         int64           `db:"id"`
+	UpdateData json.RawMessage `db:"update_data"`
+}
+
+func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserInfo, arg.ID, arg.UpdateData)
+	return err
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"server/src/db"
+	"server/src/util"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,7 @@ func (cc *GymController) CreateGym(ctx *gin.Context) {
 	var payload *CreateGym
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": "BAD_REQUEST", "error": err.Error()})
+		util.SetBadRequestStatus(ctx, err)
 		return
 	}
 
@@ -41,7 +42,7 @@ func (cc *GymController) CreateGym(ctx *gin.Context) {
 	}
 	err := cc.db.InsertGym(ctx, insert_params)
 	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"code": "INTERNAL_ERROR", "message": err.Error()})
+		util.SetInternalErrorStatus(ctx, err)
 		return
 	}
 
@@ -52,15 +53,15 @@ func (cc *GymController) GetGym(ctx *gin.Context) {
 	gymIdStr := ctx.Param("gym_id")
 	gymIdInt, err := strconv.Atoi(gymIdStr)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": "BAD_REQUEST", "message": err.Error()})
+		util.SetBadRequestStatus(ctx, err)
 	}
 	gym, err := cc.db.SelectGymInfo(ctx, int64(gymIdInt))
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, gin.H{"code": "NOT_FOUND", "message": "Failed to retrieve gym with this ID"})
+			util.SetNotFoundStatus(ctx, err)
 			return
 		}
-		ctx.JSON(http.StatusBadGateway, gin.H{"code": "INTERNAL_ERROR", "message": err.Error()})
+		util.SetInternalErrorStatus(ctx, err)
 		return
 	}
 
@@ -74,19 +75,18 @@ func (cc *GymController) LocalGymAssign(ctx *gin.Context) {
 	var payload *LocalGymAssign
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": "BAD_REQUEST", "message": err.Error()})
+		util.SetNotFoundStatus(ctx, err)
 		return
 	}
 
 	gym_id, err := cc.db.SelectGymIdByAuthKey(ctx, payload.AuthKey)
 	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"code": "INTERNAL_ERROR", "message": err.Error()})
+		util.SetInternalErrorStatus(ctx, err)
 		return
 	}
 
 	client_ip := ctx.ClientIP()
 	fmt.Println("Got client_ip:", client_ip)
 	cc.redis.Set(ctx, strconv.FormatInt(gym_id, 10), client_ip, 0)
-
 	ctx.JSON(http.StatusOK, gin.H{})
 }

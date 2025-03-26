@@ -5,6 +5,7 @@
 package db
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"time"
@@ -79,11 +80,12 @@ type Session struct {
 }
 
 type User struct {
-	ID        int64     `db:"id"`
-	Login     string    `db:"login"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-	Password  string    `db:"password"`
-	Name      string    `db:"name"`
-	Email     string    `db:"email"`
+	ID        int64          `db:"id"`
+	CreatedAt time.Time      `db:"created_at"`
+	UpdatedAt time.Time      `db:"updated_at"`
+	Password  string         `db:"password"`
+	Name      string         `db:"name"`
+	Email     string         `db:"email"`
+	Dob       sql.NullTime   `db:"dob"`
+	AvatarID  sql.NullString `db:"avatar_id"`
 }

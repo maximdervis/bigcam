@@ -18,6 +18,7 @@ func NewSessionController(db *db.Queries, ctx context.Context) *SessionControlle
 }
 
 func (cc *SessionController) CreateSession(ctx *gin.Context) {
+	// TODO: Поддержать сессии
 	ctx.JSON(http.StatusOK, gin.H{})
 }
 

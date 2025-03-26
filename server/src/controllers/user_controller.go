@@ -156,7 +156,7 @@ func (cc *UserController) GetUser(ctx *gin.Context) {
 		"email":     userInfo.Email,
 		"name":      userInfo.Name,
 		"dob":       dob,
-		"avatar_id": avatarId ,
+		"avatar_id": avatarId,
 	})
 }
 
@@ -183,7 +183,7 @@ func (cc *UserController) UpdateUser(ctx *gin.Context) {
 	// TODO: Попробовать избавиться от дублирования
 	if payload.Email != nil {
 		err = cc.db.UpdateUserEmail(ctx, db.UpdateUserEmailParams{
-			ID: userId,
+			ID:    userId,
 			Email: *payload.Email,
 		})
 		if err != nil {
@@ -194,7 +194,7 @@ func (cc *UserController) UpdateUser(ctx *gin.Context) {
 
 	if payload.Name != nil {
 		err = cc.db.UpdateUserName(ctx, db.UpdateUserNameParams{
-			ID: userId,
+			ID:   userId,
 			Name: *payload.Name,
 		})
 		if err != nil {
@@ -207,7 +207,7 @@ func (cc *UserController) UpdateUser(ctx *gin.Context) {
 		err = cc.db.UpdateUserDob(ctx, db.UpdateUserDobParams{
 			ID: userId,
 			Dob: sql.NullTime{
-				Time: *payload.Dob,
+				Time:  *payload.Dob,
 				Valid: true,
 			},
 		})
@@ -222,7 +222,7 @@ func (cc *UserController) UpdateUser(ctx *gin.Context) {
 			ID: userId,
 			AvatarID: sql.NullString{
 				String: *payload.AvatarId,
-				Valid: true,
+				Valid:  true,
 			},
 		})
 		if err != nil {

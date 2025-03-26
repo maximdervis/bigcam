@@ -15,7 +15,7 @@ var accessSecretKey = []byte("my_secret_key_access")
 var refreshSecretKey = []byte("my_secret_key_refresh")
 
 type AuthData struct {
-	AccessKey string
+	AccessKey  string
 	RefreshKey string
 }
 
@@ -30,7 +30,7 @@ func GetSignedTokens(userId string) (*AuthData, error) {
 		return nil, nil
 	}
 	authData := &AuthData{
-		AccessKey: accessKey,
+		AccessKey:  accessKey,
 		RefreshKey: refreshKey,
 	}
 	return authData, nil
@@ -53,7 +53,6 @@ func GetRefreshSignedToken(userId string) (string, error) {
 	}
 	return token, nil
 }
-
 
 func IsAuthorized() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -100,7 +99,6 @@ func ParseAccessToken(tokenString string) (claims *models.Claims, err error) {
 func ParseRefreshToken(tokenString string) (claims *models.Claims, err error) {
 	return parseToken(tokenString, refreshSecretKey)
 }
-
 
 func parseToken(tokenString string, sectetKey []byte) (claims *models.Claims, err error) {
 	token, err := jwt.ParseWithClaims(tokenString, &models.Claims{}, func(token *jwt.Token) (interface{}, error) {

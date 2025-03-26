@@ -145,9 +145,9 @@ func (cc *UserController) GetUser(ctx *gin.Context) {
 		util.SetInternalErrorStatus(ctx, err)
 	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"email": userInfo.Email,
-		"name":  userInfo.Name,
-		"dob":   userInfo.Dob,
+		"email":     userInfo.Email,
+		"name":      userInfo.Name,
+		"dob":       userInfo.Dob,
 		"avatar_id": userInfo.AvatarID,
 	})
 }
@@ -159,10 +159,10 @@ func (cc *UserController) UpdateUser(ctx *gin.Context) {
 		util.SetInternalErrorStatus(ctx, "Failed to load user_id, not authorized?")
 	}
 	type Request struct {
-		Email *string `json:"email,omitempty"`
-		Name  *string `json:"name,omitempty"`
-		Dob   *time.Time `json:"dob,omitempty"`
-		AvatarId *string `json:"avatar_id,omitempty"`
+		Email    *string    `json:"email,omitempty"`
+		Name     *string    `json:"name,omitempty"`
+		Dob      *time.Time `json:"dob,omitempty"`
+		AvatarId *string    `json:"avatar_id,omitempty"`
 	}
 	var payload *Request
 	if err = ctx.ShouldBindJSON(&payload); err != nil {
@@ -177,7 +177,7 @@ func (cc *UserController) UpdateUser(ctx *gin.Context) {
 	}
 	err = cc.db.UpdateUserInfo(ctx, db.UpdateUserInfoParams{
 		UpdateData: updateData,
-		ID: userId.(int64),
+		ID:         userId.(int64),
 	})
 	if err != nil {
 		util.SetInternalErrorStatus(ctx, err)

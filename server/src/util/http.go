@@ -25,15 +25,15 @@ func SetAccessDeniedStatusStatus(ctx *gin.Context, err interface{}) {
 func setError(ctx *gin.Context, code string, input interface{}) {
 	var message string
 	switch v := input.(type) {
-		case string:
-			message = v
-		case error:
-			message = v.Error()
-		default:
-			panic("Unexpected type in setError function")
+	case string:
+		message = v
+	case error:
+		message = v.Error()
+	default:
+		panic("Unexpected type in setError function")
 	}
 	ctx.JSON(http.StatusBadRequest, gin.H{
-		"code": code,
+		"code":    code,
 		"message": message,
 	})
 }

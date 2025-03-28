@@ -7,33 +7,91 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
+const closeSession = `-- name: CloseSession :exec
+update sessions
+set opened = false
+where id = $1
+`
+
+func (q *Queries) CloseSession(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, closeSession, id)
+	return err
+}
+
 const insertSession = `-- name: InsertSession :exec
-insert into sessions (user_id, camera_id)
-values ($1, $2)
+insert into sessions (user_id, gym_id, camera_id)
+values ($1, $2, $3)
 `
 
 type InsertSessionParams struct {
 	UserID   int64 `db:"user_id"`
+	GymID    int64 `db:"gym_id"`
 	CameraID int64 `db:"camera_id"`
 }
 
 func (q *Queries) InsertSession(ctx context.Context, arg InsertSessionParams) error {
-	_, err := q.db.ExecContext(ctx, insertSession, arg.UserID, arg.CameraID)
+	_, err := q.db.ExecContext(ctx, insertSession, arg.UserID, arg.GymID, arg.CameraID)
 	return err
+}
+
+const selectOccupiedCams = `-- name: SelectOccupiedCams :many
+select
+  gym_id,
+  camera_id,
+  name
+from sessions s
+left join users u
+on s.user_id = u.id
+where 1=1
+  and gym_id = $1
+`
+
+type SelectOccupiedCamsRow struct {
+	GymID    int64          `db:"gym_id"`
+	CameraID int64          `db:"camera_id"`
+	Name     sql.NullString `db:"name"`
+}
+
+func (q *Queries) SelectOccupiedCams(ctx context.Context, gymID int64) ([]SelectOccupiedCamsRow, error) {
+	rows, err := q.db.QueryContext(ctx, selectOccupiedCams, gymID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SelectOccupiedCamsRow
+	for rows.Next() {
+		var i SelectOccupiedCamsRow
+		if err := rows.Scan(&i.GymID, &i.CameraID, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const selectOpenedSessions = `-- name: SelectOpenedSessions :many
 select
+  id,
   gym_id,
   camera_id
 from sessions
-where user_id = $1
+where 1=1
+  and user_id = $1
+  and opened = true
 `
 
 type SelectOpenedSessionsRow struct {
-	GymID    int32 `db:"gym_id"`
+	ID       int64 `db:"id"`
+	GymID    int64 `db:"gym_id"`
 	CameraID int64 `db:"camera_id"`
 }
 
@@ -46,7 +104,7 @@ func (q *Queries) SelectOpenedSessions(ctx context.Context, userID int64) ([]Sel
 	var items []SelectOpenedSessionsRow
 	for rows.Next() {
 		var i SelectOpenedSessionsRow
-		if err := rows.Scan(&i.GymID, &i.CameraID); err != nil {
+		if err := rows.Scan(&i.ID, &i.GymID, &i.CameraID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

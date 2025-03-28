@@ -9,9 +9,11 @@ import (
 	"server/src/controllers"
 	"server/src/routes"
 	"server/src/util"
+	"time"
 
 	dbCon "server/src/db"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	_ "github.com/lib/pq"
@@ -24,9 +26,11 @@ var (
 
 	GymController       controllers.GymController
 	GymCameraController controllers.GymCameraController
+	SessionController   controllers.SessionController
 	UserController      controllers.UserController
 	GymRoute            routes.GymRoute
 	GymCamaeraRoute     routes.GymCameraRoute
+	SessionRoute        routes.SessionRoute
 	UserRoute           routes.UserRoute
 )
 
@@ -67,11 +71,22 @@ func init() {
 	GymController = *controllers.NewGymController(db, redis, ctx)
 	UserController = *controllers.NewUserController(db, ctx)
 	GymCameraController = *controllers.NewGymCameraController(db, redis, ctx)
+	SessionController = *controllers.NewSessionController(db, ctx)
 	GymRoute = routes.NewGymRoute(GymController)
 	GymCamaeraRoute = routes.NewGymCameraRoute(GymCameraController)
+	SessionRoute = routes.NewSessionRoute(SessionController)
 	UserRoute = routes.NewUserRoute(UserController)
 
 	server = gin.Default()
+
+	server.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: false,
+		MaxAge:           12 * time.Hour,
+	}))
 }
 
 func main() {
@@ -89,6 +104,7 @@ func main() {
 	GymRoute.Route(router)
 	UserRoute.Route(router)
 	GymCamaeraRoute.Route(router)
+	SessionRoute.Route(router)
 
 	server.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": fmt.Sprintf("The specified route %s not found", ctx.Request.URL)})

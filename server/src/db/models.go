@@ -71,12 +71,13 @@ type Gym struct {
 }
 
 type Session struct {
-	ID        int64     `db:"id"`
-	UserID    int64     `db:"user_id"`
-	CameraID  int64     `db:"camera_id"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
-	GymID     int32     `db:"gym_id"`
+	ID        int64        `db:"id"`
+	UserID    int64        `db:"user_id"`
+	CameraID  int64        `db:"camera_id"`
+	CreatedAt time.Time    `db:"created_at"`
+	UpdatedAt time.Time    `db:"updated_at"`
+	GymID     int64        `db:"gym_id"`
+	Opened    sql.NullBool `db:"opened"`
 }
 
 type User struct {

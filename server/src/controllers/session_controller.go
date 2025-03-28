@@ -24,7 +24,7 @@ func (cc *SessionController) CreateSession(ctx *gin.Context) {
 		util.SetInternalErrorStatus(ctx, "Failed to load user_id, not authorized?")
 	}
 	type Request struct {
-		GymId int64 `json:"gym_id" binding:"required"`
+		GymId    int64 `json:"gym_id" binding:"required"`
 		CameraId int64 `json:"camera_id" binding:"required"`
 	}
 	var payload *Request
@@ -33,8 +33,8 @@ func (cc *SessionController) CreateSession(ctx *gin.Context) {
 		return
 	}
 	err := cc.db.InsertSession(ctx, db.InsertSessionParams{
-		UserID: userId.(int64),
-		GymID: payload.GymId,
+		UserID:   userId.(int64),
+		GymID:    payload.GymId,
 		CameraID: payload.CameraId,
 	})
 	if err != nil {
@@ -45,7 +45,7 @@ func (cc *SessionController) CreateSession(ctx *gin.Context) {
 }
 
 func (cc *SessionController) FinishSession(ctx *gin.Context) {
-	// TODO: Проверять что корректный пользователь 
+	// TODO: Проверять что корректный пользователь
 	type Request struct {
 		SessionId int64 `json:"session_id" binding:"required"`
 	}
@@ -70,11 +70,11 @@ func (cc *SessionController) ListSessions(ctx *gin.Context) {
 	}
 	var response []gin.H
 	for _, item := range openedSessions {
-		response = append(response, gin.H{	
-				"session_id": item.ID,
-				"camera_id": item.CameraID,
-				"gym_id": item.GymID,
-			})
+		response = append(response, gin.H{
+			"session_id": item.ID,
+			"camera_id":  item.CameraID,
+			"gym_id":     item.GymID,
+		})
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"sessions": response,

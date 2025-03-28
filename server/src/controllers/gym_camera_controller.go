@@ -82,14 +82,14 @@ func (cc *GymCameraController) PostPtz(ctx *gin.Context) {
 		util.SetBadRequestStatus(ctx, err)
 	}
 	type Velocity struct {
-	  Pan  float64 `json:"pan"`
-	  Tilt float64 `json:"tilt"`
-	  Zoom float64 `json:"zoom"`
+		Pan  float64 `json:"pan"`
+		Tilt float64 `json:"tilt"`
+		Zoom float64 `json:"zoom"`
 	}
 
 	type Request struct {
-	  Velocity Velocity `json:"velocity"`
-	  Deadline string   `json:"deadline"`
+		Velocity Velocity `json:"velocity"`
+		Deadline string   `json:"deadline"`
 	}
 	var payload *Request
 	if err = ctx.ShouldBindJSON(&payload); err != nil {
@@ -101,7 +101,7 @@ func (cc *GymCameraController) PostPtz(ctx *gin.Context) {
 	_, err = client.R().
 		SetHeader("Content-Type", "application/json").
 		SetBody(payload).
-		Post(makeLocalUrl(cc, ctx, int64(gymIdInt), "cameras/" + cameraIdStr + "/ptz"))
+		Post(makeLocalUrl(cc, ctx, int64(gymIdInt), "cameras/"+cameraIdStr+"/ptz"))
 	if err != nil {
 		util.SetInternalErrorStatus(ctx, err)
 		return
@@ -121,7 +121,7 @@ func (cc *GymCameraController) DeletePtz(ctx *gin.Context) {
 
 	client := resty.New()
 	_, err = client.R().
-		Delete(makeLocalUrl(cc, ctx, int64(gymIdInt), "cameras/" + cameraIdStr + "/ptz"))
+		Delete(makeLocalUrl(cc, ctx, int64(gymIdInt), "cameras/"+cameraIdStr+"/ptz"))
 	if err != nil {
 		util.SetInternalErrorStatus(ctx, err)
 		return
@@ -130,24 +130,24 @@ func (cc *GymCameraController) DeletePtz(ctx *gin.Context) {
 }
 
 func isCameraOccupied(cc *GymCameraController, ctx *gin.Context, gymId int64, cameraId int64) (string, bool, error) {
-			occupiedCams, err := cc.db.SelectOccupiedCams(ctx, gymId)
-			if err != nil {
-				return "", false, err
-			}
-			occupationId := slices.IndexFunc(occupiedCams, func (c db.SelectOccupiedCamsRow) (bool) {
-								return c.CameraID == cameraId
-			})
-			if occupationId != -1 {
-				occupiedCam := occupiedCams[occupationId]
-				if !occupiedCam.Name.Valid {
-					return "", false, errors.New("failed to find user for session")
-				}
-				return occupiedCams[occupationId].Name.String, true, nil
-			}
-			return "", false, nil
+	occupiedCams, err := cc.db.SelectOccupiedCams(ctx, gymId)
+	if err != nil {
+		return "", false, err
+	}
+	occupationId := slices.IndexFunc(occupiedCams, func(c db.SelectOccupiedCamsRow) bool {
+		return c.CameraID == cameraId
+	})
+	if occupationId != -1 {
+		occupiedCam := occupiedCams[occupationId]
+		if !occupiedCam.Name.Valid {
+			return "", false, errors.New("failed to find user for session")
+		}
+		return occupiedCams[occupationId].Name.String, true, nil
+	}
+	return "", false, nil
 }
 
-func makeLocalUrl(cc *GymCameraController, ctx *gin.Context, gymId int64, path string) (string) {
+func makeLocalUrl(cc *GymCameraController, ctx *gin.Context, gymId int64, path string) string {
 	ip_addr := cc.redis.Get(ctx, strconv.FormatInt(gymId, 10))
-	return "http://"+ip_addr.Val()+path
+	return "http://" + ip_addr.Val() + path
 }

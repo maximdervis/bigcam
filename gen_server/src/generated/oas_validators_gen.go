@@ -8,38 +8,6 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s *BadRequest) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Code.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "code",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s BadRequestCode) Validate() error {
-	switch s {
-	case "BAD_REQUEST":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
 func (s *CameraAction) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -129,38 +97,6 @@ func (s *CameraInfos) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
-}
-
-func (s *NotFound) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Code.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "code",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s NotFoundCode) Validate() error {
-	switch s {
-	case "NOT_FOUND":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
 }
 
 func (s *Ok) Validate() error {

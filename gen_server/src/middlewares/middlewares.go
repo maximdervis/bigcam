@@ -82,7 +82,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		userIdInt, err := strconv.ParseInt(claims.Subject, 10, 64)
-		ctx = context.WithValue(r.Context(), "userID", userIdInt)
+		ctx = context.WithValue(r.Context(), "userId", userIdInt)
 		r = r.WithContext(ctx)
 		if err != nil {
 			http.Error(w, "Forbidden", http.StatusForbidden)

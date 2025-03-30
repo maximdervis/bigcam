@@ -22,6 +22,8 @@ paths:
         '200':
           content:
             text/html: {}
+        default:
+          $ref: "#/components/responses/Error"
 
   /api/auth/sign-in:
     post:
@@ -35,8 +37,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthTokens'
-        '400':
-            $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: "#/components/responses/Error"
       requestBody:
         required: true
         content:
@@ -54,8 +56,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthTokens'
-        '400':
-            $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: "#/components/responses/Error"
       requestBody:
         required: true
         content:
@@ -70,8 +72,8 @@ paths:
       responses:
         '200':
               $ref: '#/components/responses/Ok'
-        '400':
-              $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: "#/components/responses/Error"
       requestBody:
         required: true
         content:
@@ -86,8 +88,8 @@ paths:
       responses:
         '200':
             $ref: '#/components/responses/Ok'
-        '404':
-            $ref: '#/components/responses/NotFound'
+        default:
+          $ref: "#/components/responses/Error"
       requestBody:
         required: true
         content:
@@ -104,8 +106,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserInfo'
-        '404':
-            $ref: '#/components/responses/NotFound'
+        default:
+          $ref: "#/components/responses/Error"
   /api/gym:
     post:
       tags:
@@ -117,8 +119,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GymAuthInfo'
-        '400':
-              $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: "#/components/responses/Error"
       requestBody:
         required: true
         content:
@@ -133,8 +135,8 @@ paths:
       responses:
         '200':
             $ref: '#/components/responses/Ok'
-        '400':
-            $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: "#/components/responses/Error"
       requestBody:
         required: true
         content:
@@ -158,8 +160,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GymInfo'
-        '404':
-            $ref: '#/components/responses/NotFound'
+        default:
+          $ref: "#/components/responses/Error"
   /api/gym/camera/{gymId}:
     get:
       tags:
@@ -177,8 +179,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CameraInfos'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: "#/components/responses/Error"
   /api/gym/camera/ptz/{gymId}/{cameraId}:
     post:
       tags:
@@ -198,8 +200,8 @@ paths:
       responses:
         '200':
             $ref: '#/components/responses/Ok'
-        '400':
-            $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: "#/components/responses/Error"
       requestBody:
         required: true
         content:
@@ -224,8 +226,8 @@ paths:
       responses:
         '200':
             $ref: '#/components/responses/Ok'
-        '400':
-            $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: "#/components/responses/Error"
   /api/session:
     get:
       tags:
@@ -237,6 +239,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionsList'
+        default:
+          $ref: "#/components/responses/Error"
     post:
       tags:
         - session
@@ -247,8 +251,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StartedSession'
-        '400':
-            $ref: '#/components/responses/BadRequest'
+        default:
+          $ref: "#/components/responses/Error"
       requestBody:
         required: true
         content:
@@ -269,8 +273,8 @@ paths:
       responses:
         '200':
             $ref: '#/components/responses/Ok'
-        '404':
-            $ref: '#/components/responses/NotFound'
+        default:
+          $ref: "#/components/responses/Error"
 components:
   schemas:
     UserToUpdate:
@@ -476,39 +480,25 @@ components:
           type: string
     Empty:
       type: object
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+          code:
+            description: Response code
+            type: string
+          message:
+            description: Error details
+            type: string
   responses:
-    NotFound:
+    Error:
+      description: General Error
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - code
-              - message
-            properties:
-                code:
-                  description: Bad request response code
-                  type: string
-                  enum: [NOT_FOUND]
-                message:
-                  description: Error details
-                  type: string
-    BadRequest:
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - code
-              - message
-            properties:
-                code:
-                  description: Bad request response code
-                  type: string
-                  enum: [BAD_REQUEST]
-                message:
-                  description: Error details
-                  type: string
+            $ref: '#/components/schemas/Error'
     Ok:
       content:
         application/json:

@@ -11,11 +11,11 @@ type Handler interface {
 	// CreateGym implements createGym operation.
 	//
 	// POST /api/gym
-	CreateGym(ctx context.Context, req *GymInfo) (CreateGymRes, error)
+	CreateGym(ctx context.Context, req *GymInfo) (*GymAuthInfo, error)
 	// FinishSession implements finishSession operation.
 	//
 	// DELETE /api/session/{sessionId}
-	FinishSession(ctx context.Context, params FinishSessionParams) (FinishSessionRes, error)
+	FinishSession(ctx context.Context, params FinishSessionParams) (*Ok, error)
 	// GetApiDocs implements getApiDocs operation.
 	//
 	// Get api documentation.
@@ -25,15 +25,15 @@ type Handler interface {
 	// GetGymById implements getGymById operation.
 	//
 	// GET /api/gym/{gymId}
-	GetGymById(ctx context.Context, params GetGymByIdParams) (GetGymByIdRes, error)
+	GetGymById(ctx context.Context, params GetGymByIdParams) (*GymInfo, error)
 	// GetUser implements getUser operation.
 	//
 	// GET /api/user
-	GetUser(ctx context.Context) (GetUserRes, error)
+	GetUser(ctx context.Context) (*UserInfo, error)
 	// ListCameras implements listCameras operation.
 	//
 	// GET /api/gym/camera/{gymId}
-	ListCameras(ctx context.Context, params ListCamerasParams) (ListCamerasRes, error)
+	ListCameras(ctx context.Context, params ListCamerasParams) (*CameraInfos, error)
 	// ListSessions implements listSessions operation.
 	//
 	// GET /api/session
@@ -41,37 +41,41 @@ type Handler interface {
 	// LocalGymAssign implements localGymAssign operation.
 	//
 	// POST /api/local/gym/assign
-	LocalGymAssign(ctx context.Context, req *GymAuthInfo) (LocalGymAssignRes, error)
+	LocalGymAssign(ctx context.Context, req *GymAuthInfo) (*Ok, error)
 	// RefreshAuthTokens implements refreshAuthTokens operation.
 	//
 	// POST /api/auth/refresh
-	RefreshAuthTokens(ctx context.Context, req *AuthTokens) (RefreshAuthTokensRes, error)
+	RefreshAuthTokens(ctx context.Context, req *AuthTokens) (*AuthTokens, error)
 	// SignIn implements signIn operation.
 	//
 	// Sign in using email and password.
 	//
 	// POST /api/auth/sign-in
-	SignIn(ctx context.Context, req *SignInInfo) (SignInRes, error)
+	SignIn(ctx context.Context, req *SignInInfo) (*AuthTokens, error)
 	// SignUp implements signUp operation.
 	//
 	// POST /api/auth/sign-up
-	SignUp(ctx context.Context, req *SignUpInfo) (SignUpRes, error)
+	SignUp(ctx context.Context, req *SignUpInfo) (*Ok, error)
 	// StartCameraAction implements startCameraAction operation.
 	//
 	// POST /api/gym/camera/ptz/{gymId}/{cameraId}
-	StartCameraAction(ctx context.Context, req *CameraAction, params StartCameraActionParams) (StartCameraActionRes, error)
+	StartCameraAction(ctx context.Context, req *CameraAction, params StartCameraActionParams) (*Ok, error)
 	// StartSession implements startSession operation.
 	//
 	// POST /api/session
-	StartSession(ctx context.Context, req *SessionToStart) (StartSessionRes, error)
+	StartSession(ctx context.Context, req *SessionToStart) (*StartedSession, error)
 	// StopCameraAction implements stopCameraAction operation.
 	//
 	// DELETE /api/gym/camera/ptz/{gymId}/{cameraId}
-	StopCameraAction(ctx context.Context, params StopCameraActionParams) (StopCameraActionRes, error)
+	StopCameraAction(ctx context.Context, params StopCameraActionParams) (*Ok, error)
 	// UpdateUser implements updateUser operation.
 	//
 	// PUT /api/user
-	UpdateUser(ctx context.Context, req *UserToUpdate) (UpdateUserRes, error)
+	UpdateUser(ctx context.Context, req *UserToUpdate) (*Ok, error)
+	// NewError creates *ErrorStatusCode from error returned by handler.
+	//
+	// Used for common default response.
+	NewError(ctx context.Context, err error) *ErrorStatusCode
 }
 
 // Server implements http server based on OpenAPI v3 specification and

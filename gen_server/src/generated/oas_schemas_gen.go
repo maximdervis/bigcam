@@ -3,11 +3,16 @@
 package api
 
 import (
+	"fmt"
 	"io"
 	"time"
 
 	"github.com/go-faster/errors"
 )
+
+func (s *ErrorStatusCode) Error() string {
+	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
+}
 
 type AuthKey string
 
@@ -37,81 +42,7 @@ func (s *AuthTokens) SetRefreshToken(val string) {
 	s.RefreshToken = val
 }
 
-func (*AuthTokens) refreshAuthTokensRes() {}
-func (*AuthTokens) signInRes()            {}
-
 type AvatarId string
-
-type BadRequest struct {
-	// Bad request response code.
-	Code BadRequestCode `json:"code"`
-	// Error details.
-	Message string `json:"message"`
-}
-
-// GetCode returns the value of Code.
-func (s *BadRequest) GetCode() BadRequestCode {
-	return s.Code
-}
-
-// GetMessage returns the value of Message.
-func (s *BadRequest) GetMessage() string {
-	return s.Message
-}
-
-// SetCode sets the value of Code.
-func (s *BadRequest) SetCode(val BadRequestCode) {
-	s.Code = val
-}
-
-// SetMessage sets the value of Message.
-func (s *BadRequest) SetMessage(val string) {
-	s.Message = val
-}
-
-func (*BadRequest) createGymRes()         {}
-func (*BadRequest) localGymAssignRes()    {}
-func (*BadRequest) refreshAuthTokensRes() {}
-func (*BadRequest) signInRes()            {}
-func (*BadRequest) signUpRes()            {}
-func (*BadRequest) startCameraActionRes() {}
-func (*BadRequest) startSessionRes()      {}
-func (*BadRequest) stopCameraActionRes()  {}
-
-// Bad request response code.
-type BadRequestCode string
-
-const (
-	BadRequestCodeBADREQUEST BadRequestCode = "BAD_REQUEST"
-)
-
-// AllValues returns all BadRequestCode values.
-func (BadRequestCode) AllValues() []BadRequestCode {
-	return []BadRequestCode{
-		BadRequestCodeBADREQUEST,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s BadRequestCode) MarshalText() ([]byte, error) {
-	switch s {
-	case BadRequestCodeBADREQUEST:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *BadRequestCode) UnmarshalText(data []byte) error {
-	switch BadRequestCode(data) {
-	case BadRequestCodeBADREQUEST:
-		*s = BadRequestCodeBADREQUEST
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
 
 // Parameters for performing camera action.
 // Ref: #/components/schemas/CameraAction
@@ -232,11 +163,63 @@ func (s *CameraInfos) SetCameras(val []CameraInfo) {
 	s.Cameras = val
 }
 
-func (*CameraInfos) listCamerasRes() {}
-
 type Dob time.Time
 
 type Email string
+
+// Ref: #/components/schemas/Error
+type Error struct {
+	// Response code.
+	Code string `json:"code"`
+	// Error details.
+	Message string `json:"message"`
+}
+
+// GetCode returns the value of Code.
+func (s *Error) GetCode() string {
+	return s.Code
+}
+
+// GetMessage returns the value of Message.
+func (s *Error) GetMessage() string {
+	return s.Message
+}
+
+// SetCode sets the value of Code.
+func (s *Error) SetCode(val string) {
+	s.Code = val
+}
+
+// SetMessage sets the value of Message.
+func (s *Error) SetMessage(val string) {
+	s.Message = val
+}
+
+// ErrorStatusCode wraps Error with StatusCode.
+type ErrorStatusCode struct {
+	StatusCode int
+	Response   Error
+}
+
+// GetStatusCode returns the value of StatusCode.
+func (s *ErrorStatusCode) GetStatusCode() int {
+	return s.StatusCode
+}
+
+// GetResponse returns the value of Response.
+func (s *ErrorStatusCode) GetResponse() Error {
+	return s.Response
+}
+
+// SetStatusCode sets the value of StatusCode.
+func (s *ErrorStatusCode) SetStatusCode(val int) {
+	s.StatusCode = val
+}
+
+// SetResponse sets the value of Response.
+func (s *ErrorStatusCode) SetResponse(val Error) {
+	s.Response = val
+}
 
 type GetApiDocsOK struct {
 	Data io.Reader
@@ -268,8 +251,6 @@ func (s *GymAuthInfo) SetAuthKey(val AuthKey) {
 	s.AuthKey = val
 }
 
-func (*GymAuthInfo) createGymRes() {}
-
 // Gym info.
 // Ref: #/components/schemas/GymInfo
 type GymInfo struct {
@@ -286,79 +267,9 @@ func (s *GymInfo) SetName(val Name) {
 	s.Name = val
 }
 
-func (*GymInfo) getGymByIdRes() {}
-
 type ID int64
 
 type Name string
-
-type NotFound struct {
-	// Bad request response code.
-	Code NotFoundCode `json:"code"`
-	// Error details.
-	Message string `json:"message"`
-}
-
-// GetCode returns the value of Code.
-func (s *NotFound) GetCode() NotFoundCode {
-	return s.Code
-}
-
-// GetMessage returns the value of Message.
-func (s *NotFound) GetMessage() string {
-	return s.Message
-}
-
-// SetCode sets the value of Code.
-func (s *NotFound) SetCode(val NotFoundCode) {
-	s.Code = val
-}
-
-// SetMessage sets the value of Message.
-func (s *NotFound) SetMessage(val string) {
-	s.Message = val
-}
-
-func (*NotFound) finishSessionRes() {}
-func (*NotFound) getGymByIdRes()    {}
-func (*NotFound) getUserRes()       {}
-func (*NotFound) listCamerasRes()   {}
-func (*NotFound) updateUserRes()    {}
-
-// Bad request response code.
-type NotFoundCode string
-
-const (
-	NotFoundCodeNOTFOUND NotFoundCode = "NOT_FOUND"
-)
-
-// AllValues returns all NotFoundCode values.
-func (NotFoundCode) AllValues() []NotFoundCode {
-	return []NotFoundCode{
-		NotFoundCodeNOTFOUND,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s NotFoundCode) MarshalText() ([]byte, error) {
-	switch s {
-	case NotFoundCodeNOTFOUND:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *NotFoundCode) UnmarshalText(data []byte) error {
-	switch NotFoundCode(data) {
-	case NotFoundCodeNOTFOUND:
-		*s = NotFoundCodeNOTFOUND
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
 
 type Ok struct {
 	// OK status.
@@ -374,13 +285,6 @@ func (s *Ok) GetStatus() OkStatus {
 func (s *Ok) SetStatus(val OkStatus) {
 	s.Status = val
 }
-
-func (*Ok) finishSessionRes()     {}
-func (*Ok) localGymAssignRes()    {}
-func (*Ok) signUpRes()            {}
-func (*Ok) startCameraActionRes() {}
-func (*Ok) stopCameraActionRes()  {}
-func (*Ok) updateUserRes()        {}
 
 // OK status.
 type OkStatus string
@@ -810,8 +714,6 @@ func (s *StartedSession) SetSessionID(val ID) {
 	s.SessionID = val
 }
 
-func (*StartedSession) startSessionRes() {}
-
 // User info.
 // Ref: #/components/schemas/UserInfo
 type UserInfo struct {
@@ -860,8 +762,6 @@ func (s *UserInfo) SetDob(val OptDob) {
 func (s *UserInfo) SetAvatarID(val OptAvatarId) {
 	s.AvatarID = val
 }
-
-func (*UserInfo) getUserRes() {}
 
 // User info to update.
 // Ref: #/components/schemas/UserToUpdate

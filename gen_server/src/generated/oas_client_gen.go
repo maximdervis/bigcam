@@ -31,11 +31,11 @@ type Invoker interface {
 	// CreateGym invokes createGym operation.
 	//
 	// POST /api/gym
-	CreateGym(ctx context.Context, request *GymInfo) (CreateGymRes, error)
+	CreateGym(ctx context.Context, request *GymInfo) (*GymAuthInfo, error)
 	// FinishSession invokes finishSession operation.
 	//
 	// DELETE /api/session/{sessionId}
-	FinishSession(ctx context.Context, params FinishSessionParams) (FinishSessionRes, error)
+	FinishSession(ctx context.Context, params FinishSessionParams) (*Ok, error)
 	// GetApiDocs invokes getApiDocs operation.
 	//
 	// Get api documentation.
@@ -45,15 +45,15 @@ type Invoker interface {
 	// GetGymById invokes getGymById operation.
 	//
 	// GET /api/gym/{gymId}
-	GetGymById(ctx context.Context, params GetGymByIdParams) (GetGymByIdRes, error)
+	GetGymById(ctx context.Context, params GetGymByIdParams) (*GymInfo, error)
 	// GetUser invokes getUser operation.
 	//
 	// GET /api/user
-	GetUser(ctx context.Context) (GetUserRes, error)
+	GetUser(ctx context.Context) (*UserInfo, error)
 	// ListCameras invokes listCameras operation.
 	//
 	// GET /api/gym/camera/{gymId}
-	ListCameras(ctx context.Context, params ListCamerasParams) (ListCamerasRes, error)
+	ListCameras(ctx context.Context, params ListCamerasParams) (*CameraInfos, error)
 	// ListSessions invokes listSessions operation.
 	//
 	// GET /api/session
@@ -61,37 +61,37 @@ type Invoker interface {
 	// LocalGymAssign invokes localGymAssign operation.
 	//
 	// POST /api/local/gym/assign
-	LocalGymAssign(ctx context.Context, request *GymAuthInfo) (LocalGymAssignRes, error)
+	LocalGymAssign(ctx context.Context, request *GymAuthInfo) (*Ok, error)
 	// RefreshAuthTokens invokes refreshAuthTokens operation.
 	//
 	// POST /api/auth/refresh
-	RefreshAuthTokens(ctx context.Context, request *AuthTokens) (RefreshAuthTokensRes, error)
+	RefreshAuthTokens(ctx context.Context, request *AuthTokens) (*AuthTokens, error)
 	// SignIn invokes signIn operation.
 	//
 	// Sign in using email and password.
 	//
 	// POST /api/auth/sign-in
-	SignIn(ctx context.Context, request *SignInInfo) (SignInRes, error)
+	SignIn(ctx context.Context, request *SignInInfo) (*AuthTokens, error)
 	// SignUp invokes signUp operation.
 	//
 	// POST /api/auth/sign-up
-	SignUp(ctx context.Context, request *SignUpInfo) (SignUpRes, error)
+	SignUp(ctx context.Context, request *SignUpInfo) (*Ok, error)
 	// StartCameraAction invokes startCameraAction operation.
 	//
 	// POST /api/gym/camera/ptz/{gymId}/{cameraId}
-	StartCameraAction(ctx context.Context, request *CameraAction, params StartCameraActionParams) (StartCameraActionRes, error)
+	StartCameraAction(ctx context.Context, request *CameraAction, params StartCameraActionParams) (*Ok, error)
 	// StartSession invokes startSession operation.
 	//
 	// POST /api/session
-	StartSession(ctx context.Context, request *SessionToStart) (StartSessionRes, error)
+	StartSession(ctx context.Context, request *SessionToStart) (*StartedSession, error)
 	// StopCameraAction invokes stopCameraAction operation.
 	//
 	// DELETE /api/gym/camera/ptz/{gymId}/{cameraId}
-	StopCameraAction(ctx context.Context, params StopCameraActionParams) (StopCameraActionRes, error)
+	StopCameraAction(ctx context.Context, params StopCameraActionParams) (*Ok, error)
 	// UpdateUser invokes updateUser operation.
 	//
 	// PUT /api/user
-	UpdateUser(ctx context.Context, request *UserToUpdate) (UpdateUserRes, error)
+	UpdateUser(ctx context.Context, request *UserToUpdate) (*Ok, error)
 }
 
 // Client implements OAS client.
@@ -99,8 +99,12 @@ type Client struct {
 	serverURL *url.URL
 	baseClient
 }
+type errorHandler interface {
+	NewError(ctx context.Context, err error) *ErrorStatusCode
+}
 
 var _ Handler = struct {
+	errorHandler
 	*Client
 }{}
 
@@ -140,12 +144,12 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 // CreateGym invokes createGym operation.
 //
 // POST /api/gym
-func (c *Client) CreateGym(ctx context.Context, request *GymInfo) (CreateGymRes, error) {
+func (c *Client) CreateGym(ctx context.Context, request *GymInfo) (*GymAuthInfo, error) {
 	res, err := c.sendCreateGym(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendCreateGym(ctx context.Context, request *GymInfo) (res CreateGymRes, err error) {
+func (c *Client) sendCreateGym(ctx context.Context, request *GymInfo) (res *GymAuthInfo, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("createGym"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -213,12 +217,12 @@ func (c *Client) sendCreateGym(ctx context.Context, request *GymInfo) (res Creat
 // FinishSession invokes finishSession operation.
 //
 // DELETE /api/session/{sessionId}
-func (c *Client) FinishSession(ctx context.Context, params FinishSessionParams) (FinishSessionRes, error) {
+func (c *Client) FinishSession(ctx context.Context, params FinishSessionParams) (*Ok, error) {
 	res, err := c.sendFinishSession(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendFinishSession(ctx context.Context, params FinishSessionParams) (res FinishSessionRes, err error) {
+func (c *Client) sendFinishSession(ctx context.Context, params FinishSessionParams) (res *Ok, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("finishSession"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
@@ -376,12 +380,12 @@ func (c *Client) sendGetApiDocs(ctx context.Context) (res GetApiDocsOK, err erro
 // GetGymById invokes getGymById operation.
 //
 // GET /api/gym/{gymId}
-func (c *Client) GetGymById(ctx context.Context, params GetGymByIdParams) (GetGymByIdRes, error) {
+func (c *Client) GetGymById(ctx context.Context, params GetGymByIdParams) (*GymInfo, error) {
 	res, err := c.sendGetGymById(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetGymById(ctx context.Context, params GetGymByIdParams) (res GetGymByIdRes, err error) {
+func (c *Client) sendGetGymById(ctx context.Context, params GetGymByIdParams) (res *GymInfo, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getGymById"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -467,12 +471,12 @@ func (c *Client) sendGetGymById(ctx context.Context, params GetGymByIdParams) (r
 // GetUser invokes getUser operation.
 //
 // GET /api/user
-func (c *Client) GetUser(ctx context.Context) (GetUserRes, error) {
+func (c *Client) GetUser(ctx context.Context) (*UserInfo, error) {
 	res, err := c.sendGetUser(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetUser(ctx context.Context) (res GetUserRes, err error) {
+func (c *Client) sendGetUser(ctx context.Context) (res *UserInfo, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getUser"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -537,12 +541,12 @@ func (c *Client) sendGetUser(ctx context.Context) (res GetUserRes, err error) {
 // ListCameras invokes listCameras operation.
 //
 // GET /api/gym/camera/{gymId}
-func (c *Client) ListCameras(ctx context.Context, params ListCamerasParams) (ListCamerasRes, error) {
+func (c *Client) ListCameras(ctx context.Context, params ListCamerasParams) (*CameraInfos, error) {
 	res, err := c.sendListCameras(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendListCameras(ctx context.Context, params ListCamerasParams) (res ListCamerasRes, err error) {
+func (c *Client) sendListCameras(ctx context.Context, params ListCamerasParams) (res *CameraInfos, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("listCameras"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -698,12 +702,12 @@ func (c *Client) sendListSessions(ctx context.Context) (res *SessionsList, err e
 // LocalGymAssign invokes localGymAssign operation.
 //
 // POST /api/local/gym/assign
-func (c *Client) LocalGymAssign(ctx context.Context, request *GymAuthInfo) (LocalGymAssignRes, error) {
+func (c *Client) LocalGymAssign(ctx context.Context, request *GymAuthInfo) (*Ok, error) {
 	res, err := c.sendLocalGymAssign(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendLocalGymAssign(ctx context.Context, request *GymAuthInfo) (res LocalGymAssignRes, err error) {
+func (c *Client) sendLocalGymAssign(ctx context.Context, request *GymAuthInfo) (res *Ok, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("localGymAssign"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -771,12 +775,12 @@ func (c *Client) sendLocalGymAssign(ctx context.Context, request *GymAuthInfo) (
 // RefreshAuthTokens invokes refreshAuthTokens operation.
 //
 // POST /api/auth/refresh
-func (c *Client) RefreshAuthTokens(ctx context.Context, request *AuthTokens) (RefreshAuthTokensRes, error) {
+func (c *Client) RefreshAuthTokens(ctx context.Context, request *AuthTokens) (*AuthTokens, error) {
 	res, err := c.sendRefreshAuthTokens(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendRefreshAuthTokens(ctx context.Context, request *AuthTokens) (res RefreshAuthTokensRes, err error) {
+func (c *Client) sendRefreshAuthTokens(ctx context.Context, request *AuthTokens) (res *AuthTokens, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("refreshAuthTokens"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -846,12 +850,12 @@ func (c *Client) sendRefreshAuthTokens(ctx context.Context, request *AuthTokens)
 // Sign in using email and password.
 //
 // POST /api/auth/sign-in
-func (c *Client) SignIn(ctx context.Context, request *SignInInfo) (SignInRes, error) {
+func (c *Client) SignIn(ctx context.Context, request *SignInInfo) (*AuthTokens, error) {
 	res, err := c.sendSignIn(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendSignIn(ctx context.Context, request *SignInInfo) (res SignInRes, err error) {
+func (c *Client) sendSignIn(ctx context.Context, request *SignInInfo) (res *AuthTokens, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("signIn"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -919,12 +923,12 @@ func (c *Client) sendSignIn(ctx context.Context, request *SignInInfo) (res SignI
 // SignUp invokes signUp operation.
 //
 // POST /api/auth/sign-up
-func (c *Client) SignUp(ctx context.Context, request *SignUpInfo) (SignUpRes, error) {
+func (c *Client) SignUp(ctx context.Context, request *SignUpInfo) (*Ok, error) {
 	res, err := c.sendSignUp(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendSignUp(ctx context.Context, request *SignUpInfo) (res SignUpRes, err error) {
+func (c *Client) sendSignUp(ctx context.Context, request *SignUpInfo) (res *Ok, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("signUp"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -992,12 +996,12 @@ func (c *Client) sendSignUp(ctx context.Context, request *SignUpInfo) (res SignU
 // StartCameraAction invokes startCameraAction operation.
 //
 // POST /api/gym/camera/ptz/{gymId}/{cameraId}
-func (c *Client) StartCameraAction(ctx context.Context, request *CameraAction, params StartCameraActionParams) (StartCameraActionRes, error) {
+func (c *Client) StartCameraAction(ctx context.Context, request *CameraAction, params StartCameraActionParams) (*Ok, error) {
 	res, err := c.sendStartCameraAction(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendStartCameraAction(ctx context.Context, request *CameraAction, params StartCameraActionParams) (res StartCameraActionRes, err error) {
+func (c *Client) sendStartCameraAction(ctx context.Context, request *CameraAction, params StartCameraActionParams) (res *Ok, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("startCameraAction"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -1108,12 +1112,12 @@ func (c *Client) sendStartCameraAction(ctx context.Context, request *CameraActio
 // StartSession invokes startSession operation.
 //
 // POST /api/session
-func (c *Client) StartSession(ctx context.Context, request *SessionToStart) (StartSessionRes, error) {
+func (c *Client) StartSession(ctx context.Context, request *SessionToStart) (*StartedSession, error) {
 	res, err := c.sendStartSession(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendStartSession(ctx context.Context, request *SessionToStart) (res StartSessionRes, err error) {
+func (c *Client) sendStartSession(ctx context.Context, request *SessionToStart) (res *StartedSession, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("startSession"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -1181,12 +1185,12 @@ func (c *Client) sendStartSession(ctx context.Context, request *SessionToStart) 
 // StopCameraAction invokes stopCameraAction operation.
 //
 // DELETE /api/gym/camera/ptz/{gymId}/{cameraId}
-func (c *Client) StopCameraAction(ctx context.Context, params StopCameraActionParams) (StopCameraActionRes, error) {
+func (c *Client) StopCameraAction(ctx context.Context, params StopCameraActionParams) (*Ok, error) {
 	res, err := c.sendStopCameraAction(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendStopCameraAction(ctx context.Context, params StopCameraActionParams) (res StopCameraActionRes, err error) {
+func (c *Client) sendStopCameraAction(ctx context.Context, params StopCameraActionParams) (res *Ok, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("stopCameraAction"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
@@ -1294,12 +1298,12 @@ func (c *Client) sendStopCameraAction(ctx context.Context, params StopCameraActi
 // UpdateUser invokes updateUser operation.
 //
 // PUT /api/user
-func (c *Client) UpdateUser(ctx context.Context, request *UserToUpdate) (UpdateUserRes, error) {
+func (c *Client) UpdateUser(ctx context.Context, request *UserToUpdate) (*Ok, error) {
 	res, err := c.sendUpdateUser(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendUpdateUser(ctx context.Context, request *UserToUpdate) (res UpdateUserRes, err error) {
+func (c *Client) sendUpdateUser(ctx context.Context, request *UserToUpdate) (res *Ok, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateUser"),
 		semconv.HTTPRequestMethodKey.String("PUT"),

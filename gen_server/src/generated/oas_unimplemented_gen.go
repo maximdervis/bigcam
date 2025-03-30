@@ -16,14 +16,14 @@ var _ Handler = UnimplementedHandler{}
 // CreateGym implements createGym operation.
 //
 // POST /api/gym
-func (UnimplementedHandler) CreateGym(ctx context.Context, req *GymInfo) (r CreateGymRes, _ error) {
+func (UnimplementedHandler) CreateGym(ctx context.Context, req *GymInfo) (r *GymAuthInfo, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // FinishSession implements finishSession operation.
 //
 // DELETE /api/session/{sessionId}
-func (UnimplementedHandler) FinishSession(ctx context.Context, params FinishSessionParams) (r FinishSessionRes, _ error) {
+func (UnimplementedHandler) FinishSession(ctx context.Context, params FinishSessionParams) (r *Ok, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -39,21 +39,21 @@ func (UnimplementedHandler) GetApiDocs(ctx context.Context) (r GetApiDocsOK, _ e
 // GetGymById implements getGymById operation.
 //
 // GET /api/gym/{gymId}
-func (UnimplementedHandler) GetGymById(ctx context.Context, params GetGymByIdParams) (r GetGymByIdRes, _ error) {
+func (UnimplementedHandler) GetGymById(ctx context.Context, params GetGymByIdParams) (r *GymInfo, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // GetUser implements getUser operation.
 //
 // GET /api/user
-func (UnimplementedHandler) GetUser(ctx context.Context) (r GetUserRes, _ error) {
+func (UnimplementedHandler) GetUser(ctx context.Context) (r *UserInfo, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // ListCameras implements listCameras operation.
 //
 // GET /api/gym/camera/{gymId}
-func (UnimplementedHandler) ListCameras(ctx context.Context, params ListCamerasParams) (r ListCamerasRes, _ error) {
+func (UnimplementedHandler) ListCameras(ctx context.Context, params ListCamerasParams) (r *CameraInfos, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -67,14 +67,14 @@ func (UnimplementedHandler) ListSessions(ctx context.Context) (r *SessionsList, 
 // LocalGymAssign implements localGymAssign operation.
 //
 // POST /api/local/gym/assign
-func (UnimplementedHandler) LocalGymAssign(ctx context.Context, req *GymAuthInfo) (r LocalGymAssignRes, _ error) {
+func (UnimplementedHandler) LocalGymAssign(ctx context.Context, req *GymAuthInfo) (r *Ok, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // RefreshAuthTokens implements refreshAuthTokens operation.
 //
 // POST /api/auth/refresh
-func (UnimplementedHandler) RefreshAuthTokens(ctx context.Context, req *AuthTokens) (r RefreshAuthTokensRes, _ error) {
+func (UnimplementedHandler) RefreshAuthTokens(ctx context.Context, req *AuthTokens) (r *AuthTokens, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -83,41 +83,49 @@ func (UnimplementedHandler) RefreshAuthTokens(ctx context.Context, req *AuthToke
 // Sign in using email and password.
 //
 // POST /api/auth/sign-in
-func (UnimplementedHandler) SignIn(ctx context.Context, req *SignInInfo) (r SignInRes, _ error) {
+func (UnimplementedHandler) SignIn(ctx context.Context, req *SignInInfo) (r *AuthTokens, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // SignUp implements signUp operation.
 //
 // POST /api/auth/sign-up
-func (UnimplementedHandler) SignUp(ctx context.Context, req *SignUpInfo) (r SignUpRes, _ error) {
+func (UnimplementedHandler) SignUp(ctx context.Context, req *SignUpInfo) (r *Ok, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // StartCameraAction implements startCameraAction operation.
 //
 // POST /api/gym/camera/ptz/{gymId}/{cameraId}
-func (UnimplementedHandler) StartCameraAction(ctx context.Context, req *CameraAction, params StartCameraActionParams) (r StartCameraActionRes, _ error) {
+func (UnimplementedHandler) StartCameraAction(ctx context.Context, req *CameraAction, params StartCameraActionParams) (r *Ok, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // StartSession implements startSession operation.
 //
 // POST /api/session
-func (UnimplementedHandler) StartSession(ctx context.Context, req *SessionToStart) (r StartSessionRes, _ error) {
+func (UnimplementedHandler) StartSession(ctx context.Context, req *SessionToStart) (r *StartedSession, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // StopCameraAction implements stopCameraAction operation.
 //
 // DELETE /api/gym/camera/ptz/{gymId}/{cameraId}
-func (UnimplementedHandler) StopCameraAction(ctx context.Context, params StopCameraActionParams) (r StopCameraActionRes, _ error) {
+func (UnimplementedHandler) StopCameraAction(ctx context.Context, params StopCameraActionParams) (r *Ok, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // UpdateUser implements updateUser operation.
 //
 // PUT /api/user
-func (UnimplementedHandler) UpdateUser(ctx context.Context, req *UserToUpdate) (r UpdateUserRes, _ error) {
+func (UnimplementedHandler) UpdateUser(ctx context.Context, req *UserToUpdate) (r *Ok, _ error) {
 	return r, ht.ErrNotImplemented
+}
+
+// NewError creates *ErrorStatusCode from error returned by handler.
+//
+// Used for common default response.
+func (UnimplementedHandler) NewError(ctx context.Context, err error) (r *ErrorStatusCode) {
+	r = new(ErrorStatusCode)
+	return r
 }

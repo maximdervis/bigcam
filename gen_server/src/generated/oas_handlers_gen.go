@@ -118,7 +118,7 @@ func (s *Server) handleCreateGymRequest(args [0]string, argsEscaped bool, w http
 		}
 	}()
 
-	var response CreateGymRes
+	var response *GymAuthInfo
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -133,7 +133,7 @@ func (s *Server) handleCreateGymRequest(args [0]string, argsEscaped bool, w http
 		type (
 			Request  = *GymInfo
 			Params   = struct{}
-			Response = CreateGymRes
+			Response = *GymAuthInfo
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -152,8 +152,19 @@ func (s *Server) handleCreateGymRequest(args [0]string, argsEscaped bool, w http
 		response, err = s.h.CreateGym(ctx, request)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -249,7 +260,7 @@ func (s *Server) handleFinishSessionRequest(args [1]string, argsEscaped bool, w 
 		return
 	}
 
-	var response FinishSessionRes
+	var response *Ok
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -269,7 +280,7 @@ func (s *Server) handleFinishSessionRequest(args [1]string, argsEscaped bool, w 
 		type (
 			Request  = struct{}
 			Params   = FinishSessionParams
-			Response = FinishSessionRes
+			Response = *Ok
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -288,8 +299,19 @@ func (s *Server) handleFinishSessionRequest(args [1]string, argsEscaped bool, w 
 		response, err = s.h.FinishSession(ctx, params)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -407,8 +429,19 @@ func (s *Server) handleGetApiDocsRequest(args [0]string, argsEscaped bool, w htt
 		response, err = s.h.GetApiDocs(ctx)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -504,7 +537,7 @@ func (s *Server) handleGetGymByIdRequest(args [1]string, argsEscaped bool, w htt
 		return
 	}
 
-	var response GetGymByIdRes
+	var response *GymInfo
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -524,7 +557,7 @@ func (s *Server) handleGetGymByIdRequest(args [1]string, argsEscaped bool, w htt
 		type (
 			Request  = struct{}
 			Params   = GetGymByIdParams
-			Response = GetGymByIdRes
+			Response = *GymInfo
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -543,8 +576,19 @@ func (s *Server) handleGetGymByIdRequest(args [1]string, argsEscaped bool, w htt
 		response, err = s.h.GetGymById(ctx, params)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -626,7 +670,7 @@ func (s *Server) handleGetUserRequest(args [0]string, argsEscaped bool, w http.R
 		err error
 	)
 
-	var response GetUserRes
+	var response *UserInfo
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -641,7 +685,7 @@ func (s *Server) handleGetUserRequest(args [0]string, argsEscaped bool, w http.R
 		type (
 			Request  = struct{}
 			Params   = struct{}
-			Response = GetUserRes
+			Response = *UserInfo
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -660,8 +704,19 @@ func (s *Server) handleGetUserRequest(args [0]string, argsEscaped bool, w http.R
 		response, err = s.h.GetUser(ctx)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -757,7 +812,7 @@ func (s *Server) handleListCamerasRequest(args [1]string, argsEscaped bool, w ht
 		return
 	}
 
-	var response ListCamerasRes
+	var response *CameraInfos
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -777,7 +832,7 @@ func (s *Server) handleListCamerasRequest(args [1]string, argsEscaped bool, w ht
 		type (
 			Request  = struct{}
 			Params   = ListCamerasParams
-			Response = ListCamerasRes
+			Response = *CameraInfos
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -796,8 +851,19 @@ func (s *Server) handleListCamerasRequest(args [1]string, argsEscaped bool, w ht
 		response, err = s.h.ListCameras(ctx, params)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -913,8 +979,19 @@ func (s *Server) handleListSessionsRequest(args [0]string, argsEscaped bool, w h
 		response, err = s.h.ListSessions(ctx)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -1015,7 +1092,7 @@ func (s *Server) handleLocalGymAssignRequest(args [0]string, argsEscaped bool, w
 		}
 	}()
 
-	var response LocalGymAssignRes
+	var response *Ok
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1030,7 +1107,7 @@ func (s *Server) handleLocalGymAssignRequest(args [0]string, argsEscaped bool, w
 		type (
 			Request  = *GymAuthInfo
 			Params   = struct{}
-			Response = LocalGymAssignRes
+			Response = *Ok
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1049,8 +1126,19 @@ func (s *Server) handleLocalGymAssignRequest(args [0]string, argsEscaped bool, w
 		response, err = s.h.LocalGymAssign(ctx, request)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -1151,7 +1239,7 @@ func (s *Server) handleRefreshAuthTokensRequest(args [0]string, argsEscaped bool
 		}
 	}()
 
-	var response RefreshAuthTokensRes
+	var response *AuthTokens
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1166,7 +1254,7 @@ func (s *Server) handleRefreshAuthTokensRequest(args [0]string, argsEscaped bool
 		type (
 			Request  = *AuthTokens
 			Params   = struct{}
-			Response = RefreshAuthTokensRes
+			Response = *AuthTokens
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1185,8 +1273,19 @@ func (s *Server) handleRefreshAuthTokensRequest(args [0]string, argsEscaped bool
 		response, err = s.h.RefreshAuthTokens(ctx, request)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -1289,7 +1388,7 @@ func (s *Server) handleSignInRequest(args [0]string, argsEscaped bool, w http.Re
 		}
 	}()
 
-	var response SignInRes
+	var response *AuthTokens
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1304,7 +1403,7 @@ func (s *Server) handleSignInRequest(args [0]string, argsEscaped bool, w http.Re
 		type (
 			Request  = *SignInInfo
 			Params   = struct{}
-			Response = SignInRes
+			Response = *AuthTokens
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1323,8 +1422,19 @@ func (s *Server) handleSignInRequest(args [0]string, argsEscaped bool, w http.Re
 		response, err = s.h.SignIn(ctx, request)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -1425,7 +1535,7 @@ func (s *Server) handleSignUpRequest(args [0]string, argsEscaped bool, w http.Re
 		}
 	}()
 
-	var response SignUpRes
+	var response *Ok
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1440,7 +1550,7 @@ func (s *Server) handleSignUpRequest(args [0]string, argsEscaped bool, w http.Re
 		type (
 			Request  = *SignUpInfo
 			Params   = struct{}
-			Response = SignUpRes
+			Response = *Ok
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1459,8 +1569,19 @@ func (s *Server) handleSignUpRequest(args [0]string, argsEscaped bool, w http.Re
 		response, err = s.h.SignUp(ctx, request)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -1571,7 +1692,7 @@ func (s *Server) handleStartCameraActionRequest(args [2]string, argsEscaped bool
 		}
 	}()
 
-	var response StartCameraActionRes
+	var response *Ok
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1595,7 +1716,7 @@ func (s *Server) handleStartCameraActionRequest(args [2]string, argsEscaped bool
 		type (
 			Request  = *CameraAction
 			Params   = StartCameraActionParams
-			Response = StartCameraActionRes
+			Response = *Ok
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1614,8 +1735,19 @@ func (s *Server) handleStartCameraActionRequest(args [2]string, argsEscaped bool
 		response, err = s.h.StartCameraAction(ctx, request, params)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -1716,7 +1848,7 @@ func (s *Server) handleStartSessionRequest(args [0]string, argsEscaped bool, w h
 		}
 	}()
 
-	var response StartSessionRes
+	var response *StartedSession
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1731,7 +1863,7 @@ func (s *Server) handleStartSessionRequest(args [0]string, argsEscaped bool, w h
 		type (
 			Request  = *SessionToStart
 			Params   = struct{}
-			Response = StartSessionRes
+			Response = *StartedSession
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1750,8 +1882,19 @@ func (s *Server) handleStartSessionRequest(args [0]string, argsEscaped bool, w h
 		response, err = s.h.StartSession(ctx, request)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -1847,7 +1990,7 @@ func (s *Server) handleStopCameraActionRequest(args [2]string, argsEscaped bool,
 		return
 	}
 
-	var response StopCameraActionRes
+	var response *Ok
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1871,7 +2014,7 @@ func (s *Server) handleStopCameraActionRequest(args [2]string, argsEscaped bool,
 		type (
 			Request  = struct{}
 			Params   = StopCameraActionParams
-			Response = StopCameraActionRes
+			Response = *Ok
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1890,8 +2033,19 @@ func (s *Server) handleStopCameraActionRequest(args [2]string, argsEscaped bool,
 		response, err = s.h.StopCameraAction(ctx, params)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 
@@ -1992,7 +2146,7 @@ func (s *Server) handleUpdateUserRequest(args [0]string, argsEscaped bool, w htt
 		}
 	}()
 
-	var response UpdateUserRes
+	var response *Ok
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -2007,7 +2161,7 @@ func (s *Server) handleUpdateUserRequest(args [0]string, argsEscaped bool, w htt
 		type (
 			Request  = *UserToUpdate
 			Params   = struct{}
-			Response = UpdateUserRes
+			Response = *Ok
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -2026,8 +2180,19 @@ func (s *Server) handleUpdateUserRequest(args [0]string, argsEscaped bool, w htt
 		response, err = s.h.UpdateUser(ctx, request)
 	}
 	if err != nil {
-		defer recordError("Internal", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
+		if errRes, ok := errors.Into[*ErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
 		return
 	}
 

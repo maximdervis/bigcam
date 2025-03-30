@@ -24,6 +24,7 @@ func (q *Queries) CloseSession(ctx context.Context, id int64) error {
 const insertSession = `-- name: InsertSession :exec
 insert into sessions (user_id, gym_id, camera_id)
 values ($1, $2, $3)
+returning id
 `
 
 type InsertSessionParams struct {

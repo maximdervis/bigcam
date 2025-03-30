@@ -1,0 +1,524 @@
+openapi: 3.0.2
+servers:
+  - url: /
+info:
+  version: 1.0.0
+  title: bigcam project schema
+tags:
+  - name: docs
+  - name: camera
+  - name: user
+  - name: gym
+  - name: session
+
+paths:
+  /api:
+    get:
+      tags:
+        - docs
+      operationId: getApiDocs
+      description: Get api documentation
+      responses:
+        '200':
+          content:
+            text/html: {}
+
+  /api/auth/sign-in:
+    post:
+      tags:
+        - user
+      operationId: signIn
+      description: Sign in using email and password
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '400':
+            $ref: '#/components/responses/BadRequest'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInInfo'
+  /api/auth/refresh:
+    post:
+      tags:
+        - user
+      operationId: refreshAuthTokens
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '400':
+            $ref: '#/components/responses/BadRequest'
+      requestBody:
+        required: true
+        content:
+          application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+  /api/auth/sign-up:
+    post:
+      tags:
+        - user
+      operationId: signUp
+      responses:
+        '200':
+              $ref: '#/components/responses/Ok'
+        '400':
+              $ref: '#/components/responses/BadRequest'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpInfo'
+  /api/user:
+    put:
+      tags:
+        - user
+      operationId: updateUser
+      responses:
+        '200':
+            $ref: '#/components/responses/Ok'
+        '404':
+            $ref: '#/components/responses/NotFound'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/UserToUpdate'
+    get:
+      tags:
+        - user
+      operationId: getUser
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        '404':
+            $ref: '#/components/responses/NotFound'
+  /api/gym:
+    post:
+      tags:
+        - gym
+      operationId: createGym
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GymAuthInfo'
+        '400':
+              $ref: '#/components/responses/BadRequest'
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GymInfo'
+  /api/local/gym/assign:
+    post:
+      tags:
+        - gym
+      operationId: localGymAssign
+      responses:
+        '200':
+            $ref: '#/components/responses/Ok'
+        '400':
+            $ref: '#/components/responses/BadRequest'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GymAuthInfo'
+  /api/gym/{gymId}:
+    get:
+      tags:
+        - gym
+      operationId: getGymById
+      parameters:
+        - name: gymId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/GymId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GymInfo'
+        '404':
+            $ref: '#/components/responses/NotFound'
+  /api/gym/camera/{gymId}:
+    get:
+      tags:
+        - camera
+      operationId: listCameras
+      parameters:
+        - name: gymId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/GymId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CameraInfos'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/gym/camera/ptz/{gymId}/{cameraId}:
+    post:
+      tags:
+        - camera
+      operationId: startCameraAction
+      parameters:
+        - name: gymId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/GymId'
+        - name: cameraId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/CameraId'
+      responses:
+        '200':
+            $ref: '#/components/responses/Ok'
+        '400':
+            $ref: '#/components/responses/BadRequest'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CameraAction'
+    delete:
+      tags:
+        - camera
+      operationId: stopCameraAction
+      parameters:
+        - name: gymId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/GymId'
+        - name: cameraId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/CameraId'
+      responses:
+        '200':
+            $ref: '#/components/responses/Ok'
+        '400':
+            $ref: '#/components/responses/BadRequest'
+  /api/session:
+    get:
+      tags:
+        - session
+      operationId: listSessions
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionsList'
+    post:
+      tags:
+        - session
+      operationId: startSession
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartedSession'
+        '400':
+            $ref: '#/components/responses/BadRequest'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionToStart'
+  /api/session/{sessionId}:
+    delete:
+      tags:
+        - session
+      operationId: finishSession
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/SessionId'
+      responses:
+        '200':
+            $ref: '#/components/responses/Ok'
+        '404':
+            $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    UserToUpdate:
+        description: User info to update
+        type: object
+        properties:
+            name:
+              $ref: '#/components/schemas/Name'
+            email:
+              $ref: '#/components/schemas/Email'
+            dob:
+              $ref: '#/components/schemas/Dob'
+            avatar_id:
+              $ref: '#/components/schemas/AvatarId'
+    SessionToStart:
+      description: Session params to start
+      type: object
+      required:
+        - gym_id
+        - camera_id
+      properties:
+          gym_id:
+            $ref: '#/components/schemas/GymId'
+          camera_id:
+            $ref: '#/components/schemas/CameraId'
+    SignUpInfo:
+        description: User sign up data
+        type: object
+        required:
+          - name
+          - email
+          - password
+        properties:
+            name:
+              $ref: '#/components/schemas/Name'
+            email:
+              $ref: '#/components/schemas/Email'
+            password:
+              $ref: '#/components/schemas/Password'
+    SignInInfo:
+        description: User sign in data
+        type: object
+        required:
+          - email
+          - password
+        properties:
+            email:
+              $ref: '#/components/schemas/Email'
+            password:
+              $ref: '#/components/schemas/Password'
+    UserInfo:
+        description: User info
+        type: object
+        required:
+          - name
+          - email
+        properties:
+            name:
+              $ref: '#/components/schemas/Name'
+            email:
+              $ref: '#/components/schemas/Email'
+            dob:
+              $ref: '#/components/schemas/Dob'
+            avatar_id:
+              $ref: '#/components/schemas/AvatarId'
+    GymAuthInfo:
+      description: Gym info available on creation
+      type: object
+      required:
+        - auth_key
+      properties:
+          auth_key:
+              $ref: '#/components/schemas/AuthKey'
+    GymInfo:
+      description: Gym info
+      type: object
+      required:
+        - name
+      properties:
+          name:
+            $ref: '#/components/schemas/Name'
+    CameraInfos:
+      description: List of cameras info
+      type: object
+      required:
+        - cameras
+      properties:
+          cameras:
+            type: array
+            items:
+              $ref: '#/components/schemas/CameraInfo'
+    CameraInfo:
+        description: Camera info
+        type: object
+        required:
+          - camera_id
+          - description
+        properties:
+            camera_id:
+              $ref: '#/components/schemas/CameraId'
+            description:
+              description: Camera area description
+              type: string
+            occupied_by:
+              description: Current camera user
+              type: string
+    CameraAction:
+      description: Parameters for performing camera action
+      type: object
+      required:
+        - velocity
+        - deadline
+      properties:
+          velocity:
+            type: object
+            required:
+              - pan
+              - tilt
+              - zoom
+            properties:
+              pan:
+                  type: number
+                  format: float
+              tilt:
+                  type: number
+                  format: float
+              zoom:
+                  type: number
+                  format: float
+          deadline:
+            type: string
+    SessionsList:
+      description: List of sessions
+      type: object
+      required:
+        - sessions
+      properties:
+          sessions:
+            type: array
+            items:
+              $ref: '#/components/schemas/Session'
+    Session:
+      type: object
+      required:
+        - session_id
+        - gym_id
+        - camera_id
+      properties:
+          session_id:
+            $ref: '#/components/schemas/SessionId'
+          gym_id:
+            $ref: '#/components/schemas/GymId'
+          camera_id:
+            $ref: '#/components/schemas/CameraId'
+    StartedSession:
+      description: Started session info
+      type: object
+      required:
+        - session_id
+      properties:
+        session_id:
+          $ref: '#/components/schemas/SessionId'
+    AuthKey:
+      description: Gym auth key given on creating
+      type: string
+    AvatarId:
+      description: User avatar id
+      type: string
+    Dob:
+      description: User date of birth
+      type: string
+      format: date
+    Name:
+      description: User name
+      type: string
+    Email:
+      description: User email
+      type: string
+    Password:
+      description: User password
+      type: string
+    CameraId:
+      description: Camera unique id in local gym server
+      $ref: '#/components/schemas/Id'
+    GymId:
+      description: Gym unique id
+      $ref: '#/components/schemas/Id'
+    SessionId:
+      description: Session unique id
+      $ref: '#/components/schemas/Id'
+    Id:
+      type: integer
+      format: int64
+    AuthTokens:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+    Empty:
+      type: object
+  responses:
+    NotFound:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+                code:
+                  description: Bad request response code
+                  type: string
+                  enum: [NOT_FOUND]
+                message:
+                  description: Error details
+                  type: string
+    BadRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+                code:
+                  description: Bad request response code
+                  type: string
+                  enum: [BAD_REQUEST]
+                message:
+                  description: Error details
+                  type: string
+    Ok:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - status
+            properties:
+                status:
+                  description: OK status
+                  type: string
+                  enum: [OK]
+

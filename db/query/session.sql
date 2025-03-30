@@ -25,6 +25,7 @@ where 1=1
   and gym_id = $1
 ;
 
--- name: InsertSession :exec
+-- name: InsertSession :one
 insert into sessions (user_id, gym_id, camera_id)
-values ($1, $2, $3);
+values ($1, $2, $3)
+returning id;

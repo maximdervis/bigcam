@@ -37,7 +37,6 @@ var (
 func init() {
 	ctx = context.TODO()
 	config, err := util.LoadConfig(".")
-
 	if err != nil {
 		log.Fatalf("could not loadconfig: %v", err)
 	}

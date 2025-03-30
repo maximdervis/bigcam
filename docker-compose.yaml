@@ -10,8 +10,8 @@ services:
       - "5432:5432"
   backend:
     build:
-      context: ./server
-    container_name: server
+      context: ./gen_server
+    container_name: gen_server
     depends_on:
         - postgres
     restart: always

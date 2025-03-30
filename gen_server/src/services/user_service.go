@@ -149,4 +149,3 @@ func (cc *UserService) RefreshAuthTokens(ctx context.Context, currentTokens *api
 	}
 	return newTokens, nil
 }
-

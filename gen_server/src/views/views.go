@@ -36,7 +36,7 @@ func (cc *Handlers) GetApiDocs(ctx context.Context) (r api.GetApiDocsOK, err err
 	return r, nil
 }
 
-func (cc *Handlers) CreateGym(ctx context.Context, req *api.GymInfo) (*api.GymAuthInfo,  error) {
+func (cc *Handlers) CreateGym(ctx context.Context, req *api.GymInfo) (*api.GymAuthInfo, error) {
 	return cc.gymService.CreateGym(ctx, req)
 }
 
@@ -137,7 +137,7 @@ func (cc *Handlers) NewError(ctx context.Context, err error) (r *api.ErrorStatus
 	return &api.ErrorStatusCode{
 		StatusCode: 500,
 		Response: api.Error{
-			Code: "INTERNAL_ERROR",
+			Code:    "INTERNAL_ERROR",
 			Message: err.Error(),
 		},
 	}

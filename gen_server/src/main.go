@@ -14,6 +14,7 @@ import (
 
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 )
 
 func PgConnect(config utils.Config) (queries *dbCon.Queries, conn *sql.DB) {
@@ -61,11 +62,20 @@ func main() {
 	)
 	srv, err := api.NewServer(handlers)
 	wrappedHandler := middlewares.LoggingMiddleware(middlewares.AuthMiddleware(srv))
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(wrappedHandler)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := http.ListenAndServe(":8080", wrappedHandler); err != nil {
+	if err := http.ListenAndServe(":8080", handler); err != nil {
 		log.Fatal(err)
 	}
 }

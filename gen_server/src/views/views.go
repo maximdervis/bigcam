@@ -5,7 +5,7 @@ import (
 	"errors"
 	"os"
 
-	"gen_server/src/generated"
+	api "gen_server/src/generated"
 	"gen_server/src/services"
 )
 
